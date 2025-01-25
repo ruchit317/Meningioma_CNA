@@ -4,4 +4,6 @@ Scripts for figure generation related to meningioma microarray data. No custom c
 Scripts included here were used to assess copy number alterations in meningioma. Scripts include code chunks used to open and format processed microarray data
 and create manuscript associated figures - code chunks should be used as examples as clinical data cannot be released publicly. Scripts present here were also used to analyze publicly available DNA methylation data.
 
+Mening_CNA_Arm_Percent_Master.Rmd begins organizing the data and the bulk of figure generation.
+
 Scripts included here are associated with manuscript [doi to be added upon publication]. Please contact the corresponding author on the manuscript for additional information.
