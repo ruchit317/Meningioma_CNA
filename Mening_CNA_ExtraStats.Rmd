@@ -1,0 +1,562 @@
+---
+title: "Mening_CNA_ExtraStats"
+author: "Ruchit Patel"
+date: "2023-10-31"
+output: html_document
+---
+
+```{r}
+#Scripts here were used to run statistical comparisons between arm event frequencies and other figure stats for the project.
+#Running stats for 5% and 50% thresholds (Figure 1)
+plot_levels <- c('1p', '1q', '2p', '2q', '3p', '3q', '4p', '4q','5p', '5q', '6p', '6q','7p', '7q', '8p', '8q','9p', '9q', '10p', '10q','11p', '11q', '12p', '12q', '13q', '14q','15q', '16p', '16q','17p', '17q', '18p', '18q','19p', '19q', '20p', '20q', '21p', '21q', '22q')
+plot_levels <- rev(plot_levels)
+
+noncont_arm_loss_all <- noncont_arm_loss_samples
+noncont_arm_loss_all$Chr_Arm <- factor(noncont_arm_loss_all$Chr_Arm, levels = plot_levels)
+
+# Create a new dataframe to store the counts
+total_arm_counts_loss <- data.frame(Value = plot_levels, Count = 0)
+
+# Use a for loop to count the occurrences of each value in plot_levels
+for (value in plot_levels) {
+  count <- sum(noncont_arm_loss_all$Chr_Arm == value)  # Count the occurrences
+
+  # Update the count in the total_arm_counts dataframe
+  total_arm_counts_loss[total_arm_counts_loss$Value == value, "Count"] <- count
+}
+
+
+noncont_arm_gain_all <- noncont_arm_gain_samples
+noncont_arm_gain_all$Chr_Arm <- factor(noncont_arm_gain_all$Chr_Arm, levels = plot_levels)
+
+# Create a new dataframe to store the counts
+total_arm_counts_gain <- data.frame(Value = plot_levels, Count = 0)
+
+# Use a for loop to count the occurrences of each value in plot_levels
+for (value in plot_levels) {
+  count <- sum(noncont_arm_gain_all$Chr_Arm == value)  # Count the occurrences
+
+  # Update the count in the total_arm_counts dataframe
+  total_arm_counts_gain[total_arm_counts_gain$Value == value, "Count"] <- count
+}
+
+
+#Run Chi square for all chromosome arm losses
+# Initialize a list to store the results for each value in plot_levels
+results <- list()
+
+for (value in plot_levels) {
+  # Count the number of calls for 5
+  calls_5 <- noncont_arm_loss_5 %>%
+    filter(Chr_Arm == value) %>%
+    nrow()
+  
+  # Count the number of calls for 50
+  calls_50 <- noncont_arm_loss_50 %>%
+    filter(Chr_Arm == value) %>%
+    nrow()
+  
+  # Find the corresponding Count for the value in total_arm_counts_loss
+  count_loss <- total_arm_counts_loss %>%
+    filter(Value == value) %>%
+    select(Count) %>%
+    pull()
+  
+  # Calculate the number of no calls for 5 and 50
+  no_calls_5 <- count_loss - calls_5
+  no_calls_50 <- count_loss - calls_50
+  
+  # Create a data frame for the current value
+  result_df <- data.frame(
+    Plot_Level = value,
+    Calls_5 = calls_5,
+    No_Calls_5 = no_calls_5,
+    Calls_50 = calls_50,
+    No_Calls_50 = no_calls_50
+  )
+  
+  # Append the result to the list
+  results[[value]] <- result_df
+}
+
+# Combine the individual data frames into a single data frame
+arm_5_50_loss_testing <- do.call(rbind, results)
+
+# Create empty columns to store the p-value and df
+arm_5_50_loss_testing$p_value <- NA
+arm_5_50_loss_testing$df <- NA
+
+# Loop through each row and perform the chi-squared test
+for (i in 1:nrow(arm_5_50_loss_testing)) {
+  # Create a 2x2 contingency table
+  contingency_table <- matrix(c(
+    arm_5_50_loss_testing$Calls_5[i], arm_5_50_loss_testing$No_Calls_5[i],
+    arm_5_50_loss_testing$Calls_50[i], arm_5_50_loss_testing$No_Calls_50[i]
+  ), nrow = 2)
+  
+  # Perform the chi-squared test
+  chi_squared_result <- chisq.test(contingency_table)
+  
+  # Store the p-value and df in the respective columns
+  arm_5_50_loss_testing$p_value[i] <- chi_squared_result$p.value
+  arm_5_50_loss_testing$df[i] <- chi_squared_result$parameter
+}
+
+significant_loss_rows <- arm_5_50_loss_testing %>% filter(p_value < 0.05) %>% select(Plot_Level)
+
+
+#Run Chi square for all chromosome arm gains
+# Initialize a list to store the results for each value in plot_levels
+results <- list()
+
+for (value in plot_levels) {
+  # Count the number of calls for 5
+  calls_5 <- noncont_arm_gain_5 %>%
+    filter(Chr_Arm == value) %>%
+    nrow()
+  
+  # Count the number of calls for 50
+  calls_50 <- noncont_arm_gain_50 %>%
+    filter(Chr_Arm == value) %>%
+    nrow()
+  
+  # Find the corresponding Count for the value in total_arm_counts_gain
+  count_gain <- total_arm_counts_gain %>%
+    filter(Value == value) %>%
+    select(Count) %>%
+    pull()
+  
+  # Calculate the number of no calls for 5 and 50
+  no_calls_5 <- count_gain - calls_5
+  no_calls_50 <- count_gain - calls_50
+  
+  # Create a data frame for the current value
+  result_df <- data.frame(
+    Plot_Level = value,
+    Calls_5 = calls_5,
+    No_Calls_5 = no_calls_5,
+    Calls_50 = calls_50,
+    No_Calls_50 = no_calls_50
+  )
+  
+  # Append the result to the list
+  results[[value]] <- result_df
+}
+
+# Combine the individual data frames into a single data frame
+arm_5_50_gain_testing <- do.call(rbind, results)
+
+# Create empty columns to store the p-value and df
+arm_5_50_gain_testing$p_value <- NA
+arm_5_50_gain_testing$df <- NA
+
+# Loop through each row and perform the chi-squared test
+for (i in 1:nrow(arm_5_50_gain_testing)) {
+  # Create a 2x2 contingency table
+  contingency_table <- matrix(c(
+    arm_5_50_gain_testing$Calls_5[i], arm_5_50_gain_testing$No_Calls_5[i],
+    arm_5_50_gain_testing$Calls_50[i], arm_5_50_gain_testing$No_Calls_50[i]
+  ), nrow = 2)
+  
+  # Perform the chi-squared test
+  chi_squared_result <- chisq.test(contingency_table)
+  
+  # Store the p-value and df in the respective columns
+  arm_5_50_gain_testing$p_value[i] <- chi_squared_result$p.value
+  arm_5_50_gain_testing$df[i] <- chi_squared_result$parameter
+}
+
+significant_gain_rows <- arm_5_50_gain_testing %>% filter(p_value < 0.05) %>% select(Plot_Level)
+```
+
+```{r}
+# Arm horizontal bar plot statistical comparison (comparing p+q in gains vs losses)
+
+whole_chr <- c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22")
+
+total_arm_loss_counts <- data.frame(chr_value = character(0), sum_p_only = numeric(0), sum_q_only = numeric(0), sum_pq_both = numeric(0), total = numeric(0))
+
+for (chr_value in whole_chr) {
+  # Subset the data for the current chromosome
+  subset_data <- subset(noncont_loss_samples, Chr == chr_value)
+
+  # Calculate the sums for p_only, q_only, and pq_both
+  sum_p_only <- sum(subset_data$p_only)
+  sum_q_only <- sum(subset_data$q_only)
+  sum_pq_both <- sum(subset_data$pq_both)
+
+  # Calculate the total
+  total <- sum_p_only + sum_q_only + sum_pq_both
+
+  # Create a dataframe for the current chromosome
+  chr_data <- data.frame(chr_value, sum_p_only, sum_q_only, sum_pq_both, total)
+
+  # Append the results to the total_arm_counts dataframe
+  total_arm_loss_counts <- bind_rows(total_arm_loss_counts, chr_data)
+}
+
+total_arm_gain_counts <- data.frame(chr_value = character(0), sum_p_only = numeric(0), sum_q_only = numeric(0), sum_pq_both = numeric(0), total = numeric(0))
+
+for (chr_value in whole_chr) {
+  # Subset the data for the current chromosome
+  subset_data <- subset(noncont_gain_samples, Chr == chr_value)
+
+  # Calculate the sums for p_only, q_only, and pq_both
+  sum_p_only <- sum(subset_data$p_only)
+  sum_q_only <- sum(subset_data$q_only)
+  sum_pq_both <- sum(subset_data$pq_both)
+
+  # Calculate the total
+  total <- sum_p_only + sum_q_only + sum_pq_both
+
+  # Create a dataframe for the current chromosome
+  chr_data <- data.frame(chr_value, sum_p_only, sum_q_only, sum_pq_both, total)
+
+  # Append the results to the total_arm_counts dataframe
+  total_arm_gain_counts <- bind_rows(total_arm_gain_counts, chr_data)
+}
+
+
+# Run chi square testing
+
+# Initialize an empty dataframe to store the results
+arm_distribution_stats <- data.frame(chr_value = whole_chr, pq_gain = rep(0, 22), diff_pq_gain = rep(0, 22), pq_loss = rep(0, 22), diff_pq_loss = rep(0, 22))
+
+# Loop through each chromosome value
+for (chr in whole_chr) {
+  # Get the total counts for the current chromosome in both gain and loss dataframes
+  total_arm_gain_counts_chr <- total_arm_gain_counts %>%
+    filter(chr_value == chr)
+  total_arm_loss_counts_chr <- total_arm_loss_counts %>%
+    filter(chr_value == chr)
+
+  # Extract the values for pq_gain and diff_pq_gain
+  pq_gain <- total_arm_gain_counts_chr$sum_pq_both
+  diff_pq_gain <- total_arm_gain_counts_chr$total - pq_gain
+
+  # Extract the values for pq_loss and diff_pq_loss
+  pq_loss <- total_arm_loss_counts_chr$sum_pq_both
+  diff_pq_loss <- total_arm_loss_counts_chr$total - pq_loss
+
+  # Assign the values to the dataframe
+  arm_distribution_stats[arm_distribution_stats$chr_value == chr, "pq_gain"] <- pq_gain
+  arm_distribution_stats[arm_distribution_stats$chr_value == chr, "diff_pq_gain"] <- diff_pq_gain
+  arm_distribution_stats[arm_distribution_stats$chr_value == chr, "pq_loss"] <- pq_loss
+  arm_distribution_stats[arm_distribution_stats$chr_value == chr, "diff_pq_loss"] <- diff_pq_loss
+}
+
+# Create empty columns to store the p-value and df
+arm_distribution_stats$p_value <- NA
+arm_distribution_stats$df <- NA
+
+# Loop through each row and perform the chi-squared test
+for (i in 1:nrow(arm_distribution_stats)) {
+  # Create a 2x2 contingency table
+  contingency_table <- matrix(c(
+    arm_distribution_stats$pq_gain[i], arm_distribution_stats$diff_pq_gain[i],
+    arm_distribution_stats$pq_loss[i], arm_distribution_stats$diff_pq_loss[i]
+  ), nrow = 2)
+  
+  # Perform the chi-squared test
+  chi_squared_result <- chisq.test(contingency_table)
+  
+  # Store the p-value and df in the respective columns
+  arm_distribution_stats$p_value[i] <- chi_squared_result$p.value
+  arm_distribution_stats$df[i] <- chi_squared_result$parameter
+}
+
+significant_pq_rows <- arm_distribution_stats %>% filter(p_value < 0.05) %>% select(chr_value)
+
+```
+
+```{r}
+#Chunk to pull demographic data for patients who we were able to calculate Integrated grade for
+
+demographic_ig <- unique_mening_master %>% filter(CG_merged %in% integrated_grade_5$sample_short)
+
+#Chi square testing on IG shifts (need to import IG_Shifts_Stats). Clinical data not included here, please contact corresponding author for additional information
+
+ig_chi <- chisq.test(IG_Shifts_Stats$low, IG_Shifts_Stats$high)
+ig_pairwise <- pairwise.prop.test(IG_Shifts_Stats$low, IG_Shifts_Stats$total, p.adjust.method = "bonferroni")
+
+
+#Chunk to pull demographic data for patients who had primary, GTR, nonradiated with follow-up data. Clinical data not included here, please contact corresponding author for additional information
+
+survival_demographics <- unique_mening_master %>% filter(CG_merged %in% ig_50_kmc_test_filtered$sample_short)
+```
+
+```{r}
+#Generating KMCs for varying degrees of 1p loss. This is going to depend on the master code chunk generating the integrated_grade_5 through 95 dataframes. Also merging in WHO grade information into the ig_5_kmc sheet so that we can generate KMCs across WHO grade as well. Clinical data not included here, please contact corresponding author for additional information 
+
+#Lets try it for IG at 5% threshold
+
+#First do it for the 5% threshold (sheet and IG already calculated previously)
+ig_5_kmc_mod <- integrated_grade_5[, c("Sample", "sample_short", "recur", "1p", "ig")]
+
+#Merge in information on primary, prior RT, GTR, DOS, recdate_ifnorecurthen_lastfudate
+ig_5_kmc_mod <- ig_5_kmc_mod %>% filter(!is.na(sample_short)) %>% left_join(unique_mening_master %>% select(CG_merged, primary.y, priorRT, GTR, recur_RP, months_rec_fu, months_lastfu, Grade), by = c("sample_short" = "CG_merged")) %>% bind_rows(ig_5_kmc_mod %>% filter(is.na(sample_short)))
+
+#Remove rows where grade = NA (there are only 3)
+ig_5_kmc_mod <- ig_5_kmc_mod[!is.na(ig_5_kmc_mod$Grade), ]
+
+ig_5_kmc_mod$primary.y <- as.numeric(ig_5_kmc_mod$primary.y)
+ig_5_kmc_mod$priorRT <- as.numeric(ig_5_kmc_mod$priorRT)
+ig_5_kmc_mod$GTR <- as.numeric(ig_5_kmc_mod$GTR)
+
+#Select rows that are only primary, nonradiated, GTR and at least 6 mo of follow-up
+ig_5_kmc_mod_test <- ig_5_kmc_mod %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+ig_5_kmc_mod_test <- ig_5_kmc_mod_test %>% filter(months_lastfu >= 6)
+
+#KMC curve for PFS
+
+surv_object <- with(ig_5_kmc_mod_test, Surv(months_rec_fu, event = recur_RP))
+km_fit <- survfit(surv_object ~ Grade, data = ig_5_kmc_mod_test)
+custom_palette <- c("dodgerblue4", "chartreuse4", "firebrick2")
+
+ig_5_survival <- ggsurvplot(
+  km_fit,
+  data = ig_5_kmc_mod_test,
+  pval = FALSE,
+  conf.int = FALSE,
+  risk.table = "nrisk_cumcensor",
+  risk.table.title = "Progression Status",
+  xlab = "Time (Months)",
+  ylab = "Survival Probability",
+  title = "Kaplan-Meier Curves for Progression-Free Survival",
+  legend.labs = c("WHO 1", "WHO 2", "WHO 3"),
+  palette = custom_palette
+)
+
+
+ig_5_kmc_mod_test_filtered_short <- ig_5_kmc_mod_test %>% filter(Grade == 1 | Grade == 2)
+
+surv_object <- with(ig_5_kmc_mod_test_filtered_short, Surv(months_rec_fu, event = recur_RP))
+km_fit <- survfit(surv_object ~ Grade, data = ig_5_kmc_mod_test_filtered_short)
+custom_palette <- c("dodgerblue4", "chartreuse4")
+
+ig_5_survival_short <- ggsurvplot(
+  km_fit,
+  data = ig_5_kmc_mod_test_filtered_short,
+  pval = FALSE,
+  conf.int = FALSE,
+  risk.table = "nrisk_cumcensor",
+  risk.table.title = "Progression Status",
+  xlab = "Time (Months)",
+  ylab = "Survival Probability",
+  title = "Kaplan-Meier Curves for Progression-Free Survival",
+  legend.labs = c("WHO 1", "WHO 2"),
+  palette = custom_palette
+)
+
+
+#Now we're going to start plotting 1p loss at 5% on this KMC plot
+
+new_data_frame <- ig_5_kmc_mod_test %>% filter(`1p` == 1)
+
+new_data_frame$Grade <- 4
+new_data_frame$Grade <- as.character(new_data_frame$Grade)
+
+chr1p_5_analysis <- bind_rows(ig_5_kmc_mod_test, new_data_frame)
+
+
+#Select only WHO grade 1, grade 2, and 1p loss samples
+chr1p_5_analysis_selected <- chr1p_5_analysis %>% filter(Grade == 1 | Grade == 2 | Grade == 4)
+
+surv_object <- with(chr1p_5_analysis_selected, Surv(months_rec_fu, event = recur_RP))
+km_fit <- survfit(surv_object ~ Grade, data = chr1p_5_analysis_selected)
+custom_palette <- c("dodgerblue4", "chartreuse4", "darkorange1")
+
+chr1p_5_survival <- ggsurvplot(
+  km_fit,
+  data = chr1p_5_analysis_selected,
+  pval = TRUE,
+  conf.int = FALSE,
+  risk.table = "nrisk_cumcensor",
+  risk.table.title = "Progression Status",
+  xlab = "Time (Months)",
+  ylab = "Survival Probability",
+  title = "Kaplan-Meier Curves for Progression-Free Survival",
+  legend.labs = c("WHO 1", "WHO 2", "1p_Loss"),
+  palette = custom_palette
+)
+
+
+#Lets now look at 1p survival across all the different thresholds we tested
+
+
+#First do it for the 25% threshold (sheet and IG already calculated previously)
+ig_25_kmc_mod <- integrated_grade_25[, c("Sample", "sample_short", "recur", "1p", "ig")]
+
+#Merge in information on primary, prior RT, GTR, DOS, recdate_ifnorecurthen_lastfudate
+ig_25_kmc_mod <- ig_25_kmc_mod %>% filter(!is.na(sample_short)) %>% left_join(unique_mening_master %>% select(CG_merged, primary.y, priorRT, GTR, recur_RP, months_rec_fu, months_lastfu, Grade), by = c("sample_short" = "CG_merged")) %>% bind_rows(ig_25_kmc_mod %>% filter(is.na(sample_short)))
+
+#Remove rows where grade = NA (there are only 3)
+ig_25_kmc_mod <- ig_25_kmc_mod[!is.na(ig_25_kmc_mod$Grade), ]
+
+ig_25_kmc_mod$primary.y <- as.numeric(ig_25_kmc_mod$primary.y)
+ig_25_kmc_mod$priorRT <- as.numeric(ig_25_kmc_mod$priorRT)
+ig_25_kmc_mod$GTR <- as.numeric(ig_25_kmc_mod$GTR)
+
+#Select rows that are only primary, nonradiated, GTR and at least 6 mo of follow-up
+ig_25_kmc_mod_test <- ig_25_kmc_mod %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+ig_25_kmc_mod_test <- ig_25_kmc_mod_test %>% filter(months_lastfu >= 6)
+
+new_data_frame <- ig_25_kmc_mod_test %>% filter(`1p` == 1)
+
+new_data_frame$Grade <- 5
+new_data_frame$Grade <- as.character(new_data_frame$Grade)
+
+chr1p_analysis <- bind_rows(chr1p_5_analysis_selected, new_data_frame)
+
+
+
+#First do it for the 50% threshold (sheet and IG already calculated previously)
+ig_50_kmc_mod <- integrated_grade_50[, c("Sample", "sample_short", "recur", "1p", "ig")]
+
+#Merge in information on primary, prior RT, GTR, DOS, recdate_ifnorecurthen_lastfudate
+ig_50_kmc_mod <- ig_50_kmc_mod %>% filter(!is.na(sample_short)) %>% left_join(unique_mening_master %>% select(CG_merged, primary.y, priorRT, GTR, recur_RP, months_rec_fu, months_lastfu, Grade), by = c("sample_short" = "CG_merged")) %>% bind_rows(ig_50_kmc_mod %>% filter(is.na(sample_short)))
+
+#Remove rows where grade = NA (there are only 3)
+ig_50_kmc_mod <- ig_50_kmc_mod[!is.na(ig_50_kmc_mod$Grade), ]
+
+ig_50_kmc_mod$primary.y <- as.numeric(ig_50_kmc_mod$primary.y)
+ig_50_kmc_mod$priorRT <- as.numeric(ig_50_kmc_mod$priorRT)
+ig_50_kmc_mod$GTR <- as.numeric(ig_50_kmc_mod$GTR)
+
+#Select rows that are only primary, nonradiated, GTR and at least 6 mo of follow-up
+ig_50_kmc_mod_test <- ig_50_kmc_mod %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+ig_50_kmc_mod_test <- ig_50_kmc_mod_test %>% filter(months_lastfu >= 6)
+
+
+new_data_frame <- ig_50_kmc_mod_test %>% filter(`1p` == 1)
+
+new_data_frame$Grade <- 6
+new_data_frame$Grade <- as.character(new_data_frame$Grade)
+
+chr1p_analysis <- bind_rows(chr1p_analysis, new_data_frame)
+
+
+
+#First do it for the 75% threshold (sheet and IG already calculated previously)
+ig_75_kmc_mod <- integrated_grade_75[, c("Sample", "sample_short", "recur", "1p", "ig")]
+
+#Merge in information on primary, prior RT, GTR, DOS, recdate_ifnorecurthen_lastfudate
+ig_75_kmc_mod <- ig_75_kmc_mod %>% filter(!is.na(sample_short)) %>% left_join(unique_mening_master %>% select(CG_merged, primary.y, priorRT, GTR, recur_RP, months_rec_fu, months_lastfu, Grade), by = c("sample_short" = "CG_merged")) %>% bind_rows(ig_75_kmc_mod %>% filter(is.na(sample_short)))
+
+#Remove rows where grade = NA (there are only 3)
+ig_75_kmc_mod <- ig_75_kmc_mod[!is.na(ig_75_kmc_mod$Grade), ]
+
+ig_75_kmc_mod$primary.y <- as.numeric(ig_75_kmc_mod$primary.y)
+ig_75_kmc_mod$priorRT <- as.numeric(ig_75_kmc_mod$priorRT)
+ig_75_kmc_mod$GTR <- as.numeric(ig_75_kmc_mod$GTR)
+
+#Select rows that are only primary, nonradiated, GTR and at least 6 mo of followup
+ig_75_kmc_mod_test <- ig_75_kmc_mod %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+ig_75_kmc_mod_test <- ig_75_kmc_mod_test %>% filter(months_lastfu >= 6)
+
+new_data_frame <- ig_75_kmc_mod_test %>% filter(`1p` == 1)
+
+new_data_frame$Grade <- 7
+new_data_frame$Grade <- as.character(new_data_frame$Grade)
+
+chr1p_analysis <- bind_rows(chr1p_analysis, new_data_frame)
+
+
+
+#First do it for the 95% threshold (sheet and IG already calculated previously)
+ig_95_kmc_mod <- integrated_grade_95[, c("Sample", "sample_short", "recur", "1p", "ig")]
+
+#Merge in information on primary, prior RT, GTR, DOS, recdate_ifnorecurthen_lastfudate
+ig_95_kmc_mod <- ig_95_kmc_mod %>% filter(!is.na(sample_short)) %>% left_join(unique_mening_master %>% select(CG_merged, primary.y, priorRT, GTR, recur_RP, months_rec_fu, months_lastfu, Grade), by = c("sample_short" = "CG_merged")) %>% bind_rows(ig_95_kmc_mod %>% filter(is.na(sample_short)))
+
+#Remove rows where grade = NA (there are only 3)
+ig_95_kmc_mod <- ig_95_kmc_mod[!is.na(ig_95_kmc_mod$Grade), ]
+
+ig_95_kmc_mod$primary.y <- as.numeric(ig_95_kmc_mod$primary.y)
+ig_95_kmc_mod$priorRT <- as.numeric(ig_95_kmc_mod$priorRT)
+ig_95_kmc_mod$GTR <- as.numeric(ig_95_kmc_mod$GTR)
+
+#Select rows that are only primary, nonradiated, GTR and at least 6 mo of followup
+ig_95_kmc_mod_test <- ig_95_kmc_mod %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+ig_95_kmc_mod_test <- ig_95_kmc_mod_test %>% filter(months_lastfu >= 6)
+
+
+new_data_frame <- ig_95_kmc_mod_test %>% filter(`1p` == 1)
+
+new_data_frame$Grade <- 8
+new_data_frame$Grade <- as.character(new_data_frame$Grade)
+
+chr1p_analysis <- bind_rows(chr1p_analysis, new_data_frame)
+
+
+surv_object <- with(chr1p_analysis, Surv(months_rec_fu, event = recur_RP))
+km_fit <- survfit(surv_object ~ Grade, data = chr1p_analysis)
+
+chr1p_thresholds_surv <- ggsurvplot(
+  km_fit,
+  data = chr1p_analysis,
+  pval = FALSE,
+  conf.int = FALSE,
+  risk.table = "nrisk_cumcensor",
+  risk.table.title = "Num. at Risk (Num. Censored)",
+  xlab = "Time (Months)",
+  ylab = "Survival Probability",
+  title = "Kaplan-Meier Curves for Progression-Free Survival",
+  legend.labs = c("WHO1", "WHO2", "1p_5", "1p_25", "1p_50", "1p_75", "1p_95"),
+  palette = "Dark2",
+  ggtheme = theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank()) + theme(axis.title.x = element_blank(), axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), axis.text = element_text(size=18), text = element_text(size = 14))
+)
+
+
+#Use this code chunk to test different combinations of grades (5% G4, 25% G5, 50% G6, 75% G7, 95% G8)
+chr1p_analysis_selected <- chr1p_analysis %>% filter(Grade == 2 | Grade == 8)
+
+surv_object <- with(chr1p_analysis_selected, Surv(months_rec_fu, event = recur_RP))
+km_fit <- survfit(surv_object ~ Grade, data = chr1p_analysis_selected)
+
+chr1p_testing_survival <- ggsurvplot(
+  km_fit,
+  data = chr1p_analysis_selected,
+  pval = TRUE,
+  conf.int = FALSE,
+  risk.table = "nrisk_cumcensor",
+  risk.table.title = "Progression Status",
+  xlab = "Time (Months)",
+  ylab = "Survival Probability",
+  title = "Kaplan-Meier Curves for Progression-Free Survival",
+  legend.labs = c("WHO 2", "1p"),
+  palette = "Dark2"
+)
+
+chr1p_testing_survival
+
+```
+
+
+```{r}
+#Between 5% and 95% thresholds, determining what % of cases were discrepant
+
+merged_data <- inner_join(integrated_grade_5, integrated_grade_95, by = c("Sample", "sample_short", "mitoses", "CDKN2A", "recur"))
+
+# Step 2: Filter rows where ig values do not match
+ig_discrepant <- merged_data %>% filter(ig.x != ig.y)
+
+# Step 3: Select relevant columns for the ig_discrepant data frame
+ig_discrepant <- ig_discrepant %>% select(Sample, sample_short, mitoses, CDKN2A, recur, ig.x, ig.y)
+
+# Step 4: Rename columns for clarity
+colnames(ig_discrepant) <- c("Sample", "sample_short", "mitoses", "CDKN2A", "recur", "ig_integrated_grade_5", "ig_integrated_grade_95")
+
+
+#For primary, nonradiated, GTR cases which recurred, what proportion of recurrent cases got downgraded to IG1
+
+merged_data_2 <- inner_join(ig_5_kmc_test, ig_95_kmc_test, by = c("Sample", "sample_short", "recur", "recur_RP"))
+
+ig_prim_discrepant <- merged_data_2 %>% filter(ig.x != ig.y)
+
+ig_prim_discrepant <- ig_prim_discrepant %>% select(Sample, sample_short, recur_RP, ig.x, ig.y)
+
+colnames(ig_prim_discrepant) <- c("Sample", "sample_short", "recur_RP", "ig_integrated_grade_5", "ig_integrated_grade_95")
+
+
+```
