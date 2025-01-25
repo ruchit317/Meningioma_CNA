@@ -1,0 +1,1926 @@
+---
+title: "Mening_CNV_Locations"
+author: "Ruchit Patel"
+date: "2023-10-04"
+output: html_document
+---
+
+```{r}
+library(RColorBrewer)
+library(ggplot2)
+library(ggridges)
+library(forcats)
+library(fmsb)
+library(forestplot)
+library(dplyr)
+library(openxlsx)
+library(stringr)
+library(scales)
+library(tidyr)
+library(gridExtra)
+library(cowplot)
+library(pracma)
+library(networkD3)
+library(survival)
+library(broom)
+library(survminer)
+
+path <- '/Users/RuchitPatel/Library/Mobile Documents/com~apple~CloudDocs/Research/HMS Skull Base/CNV Threshold/Data'
+#chr_file_name <- 'chr_reference_GRCh38.p14.xlsx'
+chr_file_name <- 'chr_reference_GRCh37.p13.xlsx'
+chr_reference_file_path <- file.path(path, chr_file_name)
+
+chr_size <- read.xlsx(chr_reference_file_path)
+
+```
+
+```{r}
+#Merge in chromosome start and end locations
+
+mening_chr_location_master <- combined_mening_seg_unique %>% left_join(chr_size, by = "Chr")
+
+#Subset to Chr of interest
+chr1_samples <- mening_chr_location_master %>% filter(Chr == 1)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr1_samples <- chr1_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr2_samples <- mening_chr_location_master %>% filter(Chr == 2)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr2_samples <- chr2_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr3_samples <- mening_chr_location_master %>% filter(Chr == 3)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr3_samples <- chr3_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr4_samples <- mening_chr_location_master %>% filter(Chr == 4)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr4_samples <- chr4_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr5_samples <- mening_chr_location_master %>% filter(Chr == 5)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr5_samples <- chr5_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr6_samples <- mening_chr_location_master %>% filter(Chr == 6)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr6_samples <- chr6_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr7_samples <- mening_chr_location_master %>% filter(Chr == 7)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr7_samples <- chr7_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr8_samples <- mening_chr_location_master %>% filter(Chr == 8)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr8_samples <- chr8_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr9_samples <- mening_chr_location_master %>% filter(Chr == 9)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr9_samples <- chr9_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr10_samples <- mening_chr_location_master %>% filter(Chr == 10)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr10_samples <- chr10_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr11_samples <- mening_chr_location_master %>% filter(Chr == 11)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr11_samples <- chr11_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr12_samples <- mening_chr_location_master %>% filter(Chr == 12)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr12_samples <- chr12_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr13_samples <- mening_chr_location_master %>% filter(Chr == 13)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr13_samples <- chr13_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr14_samples <- mening_chr_location_master %>% filter(Chr == 14)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr14_samples <- chr14_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr15_samples <- mening_chr_location_master %>% filter(Chr == 15)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr15_samples <- chr15_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr16_samples <- mening_chr_location_master %>% filter(Chr == 16)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr16_samples <- chr16_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr17_samples <- mening_chr_location_master %>% filter(Chr == 17)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr17_samples <- chr17_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr18_samples <- mening_chr_location_master %>% filter(Chr == 18)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr18_samples <- chr18_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr19_samples <- mening_chr_location_master %>% filter(Chr == 19)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr19_samples <- chr19_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr20_samples <- mening_chr_location_master %>% filter(Chr == 20)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr20_samples <- chr20_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr21_samples <- mening_chr_location_master %>% filter(Chr == 21)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr21_samples <- chr21_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+
+#Subset to Chr of interest
+chr22_samples <- mening_chr_location_master %>% filter(Chr == 22)
+#Adjust for probes at the end of the chromosome which extend off the end
+chr22_samples <- chr22_samples %>% mutate(End_mod = ifelse(End > end, end, End))
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 1
+chr1_samples_loss <- chr1_samples %>% filter(Event == 'loss')
+chr1_samples_gain <- chr1_samples %>% filter(Event == 'gain')
+
+chr1_start = 0
+chr1_end = chr_size %>% filter(Chr == 1) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr1_start to chr1_end (binning because otherwise too data intensive to plot)
+chr1_loss_frequency <- data.frame(position = seq(chr1_start, chr1_end, by = 150000))
+
+if (chr1_loss_frequency$position[length(chr1_loss_frequency$position)] < chr1_end) {
+  chr1_loss_frequency <- rbind(chr1_loss_frequency, data.frame(position = chr1_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr1_loss_frequency$count <- 0
+
+# Loop through each row in chr1_samples_loss
+for (i in 1:nrow(chr1_samples_loss)) {
+  start_position <- chr1_samples_loss$Start[i]
+  end_position <- chr1_samples_loss$End_mod[i]
+
+  # Increment count in chr1_frequency for positions between Start and End_mod
+  chr1_loss_frequency$count[chr1_loss_frequency$position >= start_position & chr1_loss_frequency$position <= end_position] <- 
+    chr1_loss_frequency$count[chr1_loss_frequency$position >= start_position & chr1_loss_frequency$position <= end_position] + 1
+}
+
+chr1_loss_frequency$count <- chr1_loss_frequency$count / 1042
+
+chr1_loss_plot <- ggplot(chr1_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 50000000, 75000000, 100000000, 121500000, 125000000, 128800000, 142500000, 150000000, 175000000, 200000000, 225000000, 249250621), labels = c("0", "25", "50", "75", "100", "Cen_S" ,"Mid", "Cen_E", "1q12_end", "150", "175", "200", "225", "249")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr1_loss_plot.png", plot = chr1_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# Chr1 Gains
+# Create a data frame with positions from chr1_start to chr1_end (binning because otherwise too data intensive to plot)
+chr1_gain_frequency <- data.frame(position = seq(chr1_start, chr1_end, by = 150000))
+
+if (chr1_gain_frequency$position[length(chr1_gain_frequency$position)] < chr1_end) {
+  chr1_gain_frequency <- rbind(chr1_gain_frequency, data.frame(position = chr1_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr1_gain_frequency$count <- 0
+
+# Loop through each row in chr1_samples_loss
+for (i in 1:nrow(chr1_samples_gain)) {
+  start_position <- chr1_samples_gain$Start[i]
+  end_position <- chr1_samples_gain$End_mod[i]
+
+  # Increment count in chr1_frequency for positions between Start and End_mod
+  chr1_gain_frequency$count[chr1_gain_frequency$position >= start_position & chr1_gain_frequency$position <= end_position] <- 
+    chr1_gain_frequency$count[chr1_gain_frequency$position >= start_position & chr1_gain_frequency$position <= end_position] + 1
+}
+
+chr1_gain_frequency$count <- chr1_gain_frequency$count / 1042
+
+chr1_gain_plot <- ggplot(chr1_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 50000000, 75000000, 100000000, 121500000, 125000000, 128800000, 142500000, 150000000, 175000000, 200000000, 225000000, 249250621), labels = c("0", "25", "50", "75", "100", "Cen_S" ,"Mid", "Cen_E", "1q12_end", "150", "175", "200", "225", "249")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr1_gain_plot.png", plot = chr1_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 2
+chr2_samples_loss <- chr2_samples %>% filter(Event == 'loss')
+chr2_samples_gain <- chr2_samples %>% filter(Event == 'gain')
+
+chr2_start = 0
+chr2_end = chr_size %>% filter(Chr == 2) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr2_start to chr2_end (binning because otherwise too data intensive to plot)
+chr2_loss_frequency <- data.frame(position = seq(chr2_start, chr2_end, by = 150000))
+
+if (chr2_loss_frequency$position[length(chr2_loss_frequency$position)] < chr2_end) {
+  chr2_loss_frequency <- rbind(chr2_loss_frequency, data.frame(position = chr2_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr2_loss_frequency$count <- 0
+
+# Loop through each row in chr2_samples_loss
+for (i in 1:nrow(chr2_samples_loss)) {
+  start_position <- chr2_samples_loss$Start[i]
+  end_position <- chr2_samples_loss$End_mod[i]
+
+  # Increment count in chr2_frequency for positions between Start and End_mod
+  chr2_loss_frequency$count[chr2_loss_frequency$position >= start_position & chr2_loss_frequency$position <= end_position] <- 
+    chr2_loss_frequency$count[chr2_loss_frequency$position >= start_position & chr2_loss_frequency$position <= end_position] + 1
+}
+
+chr2_loss_frequency$count <- chr2_loss_frequency$count / 1042
+
+chr2_loss_plot <- ggplot(chr2_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 50000000, 75000000, 90500000, 93300000, 95300000, 100000000, 125000000, 150000000, 175000000, 200000000, 225000000, 243199373), labels = c("0", "25", "50", "75", "S", "M", "E", "100", "125", "150", "175", "200", "225", "242")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr2_loss_plot.png", plot = chr2_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr2 Gains
+# Create a data frame with positions from chr2_start to chr2_end (binning because otherwise too data intensive to plot)
+chr2_gain_frequency <- data.frame(position = seq(chr2_start, chr2_end, by = 150000))
+
+if (chr2_gain_frequency$position[length(chr2_gain_frequency$position)] < chr2_end) {
+  chr2_gain_frequency <- rbind(chr2_gain_frequency, data.frame(position = chr2_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr2_gain_frequency$count <- 0
+
+# Loop through each row in chr2_samples_loss
+for (i in 1:nrow(chr2_samples_gain)) {
+  start_position <- chr2_samples_gain$Start[i]
+  end_position <- chr2_samples_gain$End_mod[i]
+
+  # Increment count in chr2_frequency for positions between Start and End_mod
+  chr2_gain_frequency$count[chr2_gain_frequency$position >= start_position & chr2_gain_frequency$position <= end_position] <- 
+    chr2_gain_frequency$count[chr2_gain_frequency$position >= start_position & chr2_gain_frequency$position <= end_position] + 1
+}
+
+chr2_gain_frequency$count <- chr2_gain_frequency$count / 1042
+
+chr2_gain_plot <- ggplot(chr2_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 50000000, 75000000, 90500000, 93300000, 95300000, 100000000, 125000000, 150000000, 175000000, 200000000, 225000000, 243199373), labels = c("0", "25", "50", "75", "S", "M", "E", "100", "125", "150", "175", "200", "225", "242")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr2_gain_plot.png", plot = chr2_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 3
+chr3_samples_loss <- chr3_samples %>% filter(Event == 'loss')
+chr3_samples_gain <- chr3_samples %>% filter(Event == 'gain')
+
+chr3_start = 0
+chr3_end = chr_size %>% filter(Chr == 3) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr3_start to chr3_end (binning because otherwise too data intensive to plot)
+chr3_loss_frequency <- data.frame(position = seq(chr3_start, chr3_end, by = 120000))
+
+if (chr3_loss_frequency$position[length(chr3_loss_frequency$position)] < chr3_end) {
+  chr3_loss_frequency <- rbind(chr3_loss_frequency, data.frame(position = chr3_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr3_loss_frequency$count <- 0
+
+# Loop through each row in chr3_samples_loss
+for (i in 1:nrow(chr3_samples_loss)) {
+  start_position <- chr3_samples_loss$Start[i]
+  end_position <- chr3_samples_loss$End_mod[i]
+
+  # Increment count in chr3_frequency for positions between Start and End_mod
+  chr3_loss_frequency$count[chr3_loss_frequency$position >= start_position & chr3_loss_frequency$position <= end_position] <- 
+    chr3_loss_frequency$count[chr3_loss_frequency$position >= start_position & chr3_loss_frequency$position <= end_position] + 1
+}
+
+chr3_loss_frequency$count <- chr3_loss_frequency$count / 1042
+
+chr3_loss_plot <- ggplot(chr3_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 50000000, 75000000, 90500000, 91000000, 93500000, 100000000, 125000000, 150000000, 175000000, 198022430), labels = c("0", "25", "50", "75", "S", "M", "E", "100", "125", "150", "175", "198")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr3_loss_plot.png", plot = chr3_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr3 Gains
+# Create a data frame with positions from chr3_start to chr3_end (binning because otherwise too data intensive to plot)
+chr3_gain_frequency <- data.frame(position = seq(chr3_start, chr3_end, by = 120000))
+
+if (chr3_gain_frequency$position[length(chr3_gain_frequency$position)] < chr3_end) {
+  chr3_gain_frequency <- rbind(chr3_gain_frequency, data.frame(position = chr3_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr3_gain_frequency$count <- 0
+
+# Loop through each row in chr3_samples_loss
+for (i in 1:nrow(chr3_samples_gain)) {
+  start_position <- chr3_samples_gain$Start[i]
+  end_position <- chr3_samples_gain$End_mod[i]
+
+  # Increment count in chr3_frequency for positions between Start and End_mod
+  chr3_gain_frequency$count[chr3_gain_frequency$position >= start_position & chr3_gain_frequency$position <= end_position] <- 
+    chr3_gain_frequency$count[chr3_gain_frequency$position >= start_position & chr3_gain_frequency$position <= end_position] + 1
+}
+
+chr3_gain_frequency$count <- chr3_gain_frequency$count / 1042
+
+chr3_gain_plot <- ggplot(chr3_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 50000000, 75000000, 90500000, 91000000, 93500000, 100000000, 125000000, 150000000, 175000000, 198022430), labels = c("0", "25", "50", "75", "S", "M", "E", "100", "125", "150", "175", "198")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr3_gain_plot.png", plot = chr3_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 4
+chr4_samples_loss <- chr4_samples %>% filter(Event == 'loss')
+chr4_samples_gain <- chr4_samples %>% filter(Event == 'gain')
+
+chr4_start = 0
+chr4_end = chr_size %>% filter(Chr == 4) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr4_start to chr4_end (binning because otherwise too data intensive to plot)
+chr4_loss_frequency <- data.frame(position = seq(chr4_start, chr4_end, by = 120000))
+
+if (chr4_loss_frequency$position[length(chr4_loss_frequency$position)] < chr4_end) {
+  chr4_loss_frequency <- rbind(chr4_loss_frequency, data.frame(position = chr4_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr4_loss_frequency$count <- 0
+
+# Loop through each row in chr4_samples_loss
+for (i in 1:nrow(chr4_samples_loss)) {
+  start_position <- chr4_samples_loss$Start[i]
+  end_position <- chr4_samples_loss$End_mod[i]
+
+  # Increment count in chr4_frequency for positions between Start and End_mod
+  chr4_loss_frequency$count[chr4_loss_frequency$position >= start_position & chr4_loss_frequency$position <= end_position] <- 
+    chr4_loss_frequency$count[chr4_loss_frequency$position >= start_position & chr4_loss_frequency$position <= end_position] + 1
+}
+
+chr4_loss_frequency$count <- chr4_loss_frequency$count / 1042
+
+chr4_loss_plot <- ggplot(chr4_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 49650000, 50400000, 52600000, 75000000, 100000000, 125000000, 150000000, 175000000, 191154276), labels = c("0", "25", "S", "M", "E", "75", "100", "125", "150", "175", "191")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr4_loss_plot.png", plot = chr4_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr4 Gains
+# Create a data frame with positions from chr4_start to chr4_end (binning because otherwise too data intensive to plot)
+chr4_gain_frequency <- data.frame(position = seq(chr4_start, chr4_end, by = 120000))
+
+if (chr4_gain_frequency$position[length(chr4_gain_frequency$position)] < chr4_end) {
+  chr4_gain_frequency <- rbind(chr4_gain_frequency, data.frame(position = chr4_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr4_gain_frequency$count <- 0
+
+# Loop through each row in chr4_samples_loss
+for (i in 1:nrow(chr4_samples_gain)) {
+  start_position <- chr4_samples_gain$Start[i]
+  end_position <- chr4_samples_gain$End_mod[i]
+
+  # Increment count in chr4_frequency for positions between Start and End_mod
+  chr4_gain_frequency$count[chr4_gain_frequency$position >= start_position & chr4_gain_frequency$position <= end_position] <- 
+    chr4_gain_frequency$count[chr4_gain_frequency$position >= start_position & chr4_gain_frequency$position <= end_position] + 1
+}
+
+chr4_gain_frequency$count <- chr4_gain_frequency$count / 1042
+
+chr4_gain_plot <- ggplot(chr4_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 49650000, 50400000, 52600000, 75000000, 100000000, 125000000, 150000000, 175000000, 191154276), labels = c("0", "25", "S", "M", "E", "75", "100", "125", "150", "175", "191")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr4_gain_plot.png", plot = chr4_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 5
+chr5_samples_loss <- chr5_samples %>% filter(Event == 'loss')
+chr5_samples_gain <- chr5_samples %>% filter(Event == 'gain')
+
+chr5_start = 0
+chr5_end = chr_size %>% filter(Chr == 5) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr5_start to chr5_end (binning because otherwise too data intensive to plot)
+chr5_loss_frequency <- data.frame(position = seq(chr5_start, chr5_end, by = 110000))
+
+if (chr5_loss_frequency$position[length(chr5_loss_frequency$position)] < chr5_end) {
+  chr5_loss_frequency <- rbind(chr5_loss_frequency, data.frame(position = chr5_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr5_loss_frequency$count <- 0
+
+# Loop through each row in chr5_samples_loss
+for (i in 1:nrow(chr5_samples_loss)) {
+  start_position <- chr5_samples_loss$Start[i]
+  end_position <- chr5_samples_loss$End_mod[i]
+
+  # Increment count in chr5_frequency for positions between Start and End_mod
+  chr5_loss_frequency$count[chr5_loss_frequency$position >= start_position & chr5_loss_frequency$position <= end_position] <- 
+    chr5_loss_frequency$count[chr5_loss_frequency$position >= start_position & chr5_loss_frequency$position <= end_position] + 1
+}
+
+chr5_loss_frequency$count <- chr5_loss_frequency$count / 1042
+
+chr5_loss_plot <- ggplot(chr5_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 46400000, 48400000, 49400000, 75000000, 100000000, 125000000, 150000000, 175000000, 180915260), labels = c("0", "25", "S", "M", "E", "75", "100", "125", "150", "175", "181")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr5_loss_plot.png", plot = chr5_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr5 Gains
+# Create a data frame with positions from chr5_start to chr5_end (binning because otherwise too data intensive to plot)
+chr5_gain_frequency <- data.frame(position = seq(chr5_start, chr5_end, by = 110000))
+
+if (chr5_gain_frequency$position[length(chr5_gain_frequency$position)] < chr5_end) {
+  chr5_gain_frequency <- rbind(chr5_gain_frequency, data.frame(position = chr5_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr5_gain_frequency$count <- 0
+
+# Loop through each row in chr5_samples_loss
+for (i in 1:nrow(chr5_samples_gain)) {
+  start_position <- chr5_samples_gain$Start[i]
+  end_position <- chr5_samples_gain$End_mod[i]
+
+  # Increment count in chr5_frequency for positions between Start and End_mod
+  chr5_gain_frequency$count[chr5_gain_frequency$position >= start_position & chr5_gain_frequency$position <= end_position] <- 
+    chr5_gain_frequency$count[chr5_gain_frequency$position >= start_position & chr5_gain_frequency$position <= end_position] + 1
+}
+
+chr5_gain_frequency$count <- chr5_gain_frequency$count / 1042
+
+chr5_gain_plot <- ggplot(chr5_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 46400000, 48400000, 49400000, 75000000, 100000000, 125000000, 150000000, 175000000, 180915260), labels = c("0", "25", "S", "M", "E", "75", "100", "125", "150", "175", "181")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr5_gain_plot.png", plot = chr5_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 6
+chr6_samples_loss <- chr6_samples %>% filter(Event == 'loss')
+chr6_samples_gain <- chr6_samples %>% filter(Event == 'gain')
+
+chr6_start = 0
+chr6_end = chr_size %>% filter(Chr == 6) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr6_start to chr6_end (binning because otherwise too data intensive to plot)
+chr6_loss_frequency <- data.frame(position = seq(chr6_start, chr6_end, by = 105000))
+
+if (chr6_loss_frequency$position[length(chr6_loss_frequency$position)] < chr6_end) {
+  chr6_loss_frequency <- rbind(chr6_loss_frequency, data.frame(position = chr6_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr6_loss_frequency$count <- 0
+
+# Loop through each row in chr6_samples_loss
+for (i in 1:nrow(chr6_samples_loss)) {
+  start_position <- chr6_samples_loss$Start[i]
+  end_position <- chr6_samples_loss$End_mod[i]
+
+  # Increment count in chr6_frequency for positions between Start and End_mod
+  chr6_loss_frequency$count[chr6_loss_frequency$position >= start_position & chr6_loss_frequency$position <= end_position] <- 
+    chr6_loss_frequency$count[chr6_loss_frequency$position >= start_position & chr6_loss_frequency$position <= end_position] + 1
+}
+
+chr6_loss_frequency$count <- chr6_loss_frequency$count / 1042
+
+chr6_loss_plot <- ggplot(chr6_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 50000000, 58800000, 61000000, 61900000, 75000000, 100000000, 125000000, 150000000, 171115067), labels = c("0", "25", "50", "S", "M", "E", "75", "100", "125", "150", "171")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr6_loss_plot.png", plot = chr6_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr6 Gains
+# Create a data frame with positions from chr6_start to chr6_end (binning because otherwise too data intensive to plot)
+chr6_gain_frequency <- data.frame(position = seq(chr6_start, chr6_end, by = 105000))
+
+if (chr6_gain_frequency$position[length(chr6_gain_frequency$position)] < chr6_end) {
+  chr6_gain_frequency <- rbind(chr6_gain_frequency, data.frame(position = chr6_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr6_gain_frequency$count <- 0
+
+# Loop through each row in chr6_samples_loss
+for (i in 1:nrow(chr6_samples_gain)) {
+  start_position <- chr6_samples_gain$Start[i]
+  end_position <- chr6_samples_gain$End_mod[i]
+
+  # Increment count in chr6_frequency for positions between Start and End_mod
+  chr6_gain_frequency$count[chr6_gain_frequency$position >= start_position & chr6_gain_frequency$position <= end_position] <- 
+    chr6_gain_frequency$count[chr6_gain_frequency$position >= start_position & chr6_gain_frequency$position <= end_position] + 1
+}
+
+chr6_gain_frequency$count <- chr6_gain_frequency$count / 1042
+
+chr6_gain_plot <- ggplot(chr6_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 50000000, 58800000, 61000000, 61900000, 75000000, 100000000, 125000000, 150000000, 171115067), labels = c("0", "25", "50", "S", "M", "E", "75", "100", "125", "150", "171")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr6_gain_plot.png", plot = chr6_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 7
+chr7_samples_loss <- chr7_samples %>% filter(Event == 'loss')
+chr7_samples_gain <- chr7_samples %>% filter(Event == 'gain')
+
+chr7_start = 0
+chr7_end = chr_size %>% filter(Chr == 7) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr7_start to chr7_end (binning because otherwise too data intensive to plot)
+chr7_loss_frequency <- data.frame(position = seq(chr7_start, chr7_end, by = 100000))
+
+if (chr7_loss_frequency$position[length(chr7_loss_frequency$position)] < chr7_end) {
+  chr7_loss_frequency <- rbind(chr7_loss_frequency, data.frame(position = chr7_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr7_loss_frequency$count <- 0
+
+# Loop through each row in chr7_samples_loss
+for (i in 1:nrow(chr7_samples_loss)) {
+  start_position <- chr7_samples_loss$Start[i]
+  end_position <- chr7_samples_loss$End_mod[i]
+
+  # Increment count in chr7_frequency for positions between Start and End_mod
+  chr7_loss_frequency$count[chr7_loss_frequency$position >= start_position & chr7_loss_frequency$position <= end_position] <- 
+    chr7_loss_frequency$count[chr7_loss_frequency$position >= start_position & chr7_loss_frequency$position <= end_position] + 1
+}
+
+chr7_loss_frequency$count <- chr7_loss_frequency$count / 1042
+
+chr7_loss_plot <- ggplot(chr7_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 50000000, 58050000, 59900000, 61000000, 75000000, 100000000, 125000000, 150000000, 159138663), labels = c("0", "25", "50", "S", "M", "E", "75", "100", "125", "150", "159")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr7_loss_plot.png", plot = chr7_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr7 Gains
+# Create a data frame with positions from chr7_start to chr7_end (binning because otherwise too data intensive to plot)
+chr7_gain_frequency <- data.frame(position = seq(chr7_start, chr7_end, by = 100000))
+
+if (chr7_gain_frequency$position[length(chr7_gain_frequency$position)] < chr7_end) {
+  chr7_gain_frequency <- rbind(chr7_gain_frequency, data.frame(position = chr7_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr7_gain_frequency$count <- 0
+
+# Loop through each row in chr7_samples_loss
+for (i in 1:nrow(chr7_samples_gain)) {
+  start_position <- chr7_samples_gain$Start[i]
+  end_position <- chr7_samples_gain$End_mod[i]
+
+  # Increment count in chr7_frequency for positions between Start and End_mod
+  chr7_gain_frequency$count[chr7_gain_frequency$position >= start_position & chr7_gain_frequency$position <= end_position] <- 
+    chr7_gain_frequency$count[chr7_gain_frequency$position >= start_position & chr7_gain_frequency$position <= end_position] + 1
+}
+
+chr7_gain_frequency$count <- chr7_gain_frequency$count / 1042
+
+chr7_gain_plot <- ggplot(chr7_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 50000000, 58050000, 59900000, 61000000, 75000000, 100000000, 125000000, 150000000, 159138663), labels = c("0", "25", "50", "S", "M", "E", "75", "100", "125", "150", "159")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr7_gain_plot.png", plot = chr7_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 8
+chr8_samples_loss <- chr8_samples %>% filter(Event == 'loss')
+chr8_samples_gain <- chr8_samples %>% filter(Event == 'gain')
+
+chr8_start = 0
+chr8_end = chr_size %>% filter(Chr == 8) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr8_start to chr8_end (binning because otherwise too data intensive to plot)
+chr8_loss_frequency <- data.frame(position = seq(chr8_start, chr8_end, by = 90000))
+
+if (chr8_loss_frequency$position[length(chr8_loss_frequency$position)] < chr8_end) {
+  chr8_loss_frequency <- rbind(chr8_loss_frequency, data.frame(position = chr8_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr8_loss_frequency$count <- 0
+
+# Loop through each row in chr8_samples_loss
+for (i in 1:nrow(chr8_samples_loss)) {
+  start_position <- chr8_samples_loss$Start[i]
+  end_position <- chr8_samples_loss$End_mod[i]
+
+  # Increment count in chr8_frequency for positions between Start and End_mod
+  chr8_loss_frequency$count[chr8_loss_frequency$position >= start_position & chr8_loss_frequency$position <= end_position] <- 
+    chr8_loss_frequency$count[chr8_loss_frequency$position >= start_position & chr8_loss_frequency$position <= end_position] + 1
+}
+
+chr8_loss_frequency$count <- chr8_loss_frequency$count / 1042
+
+chr8_loss_plot <- ggplot(chr8_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 43800000, 45600000, 46800000, 50000000, 75000000, 100000000, 125000000, 146364022), labels = c("0", "25", "S", "M", "E", "50", "75", "100", "125", "146")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr8_loss_plot.png", plot = chr8_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr8 Gains
+# Create a data frame with positions from chr8_start to chr8_end (binning because otherwise too data intensive to plot)
+chr8_gain_frequency <- data.frame(position = seq(chr8_start, chr8_end, by = 90000))
+
+if (chr8_gain_frequency$position[length(chr8_gain_frequency$position)] < chr8_end) {
+  chr8_gain_frequency <- rbind(chr8_gain_frequency, data.frame(position = chr8_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr8_gain_frequency$count <- 0
+
+# Loop through each row in chr8_samples_loss
+for (i in 1:nrow(chr8_samples_gain)) {
+  start_position <- chr8_samples_gain$Start[i]
+  end_position <- chr8_samples_gain$End_mod[i]
+
+  # Increment count in chr8_frequency for positions between Start and End_mod
+  chr8_gain_frequency$count[chr8_gain_frequency$position >= start_position & chr8_gain_frequency$position <= end_position] <- 
+    chr8_gain_frequency$count[chr8_gain_frequency$position >= start_position & chr8_gain_frequency$position <= end_position] + 1
+}
+
+chr8_gain_frequency$count <- chr8_gain_frequency$count / 1042
+
+chr8_gain_plot <- ggplot(chr8_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 43800000, 45600000, 46800000, 50000000, 75000000, 100000000, 125000000, 146364022), labels = c("0", "25", "S", "M", "E", "50", "75", "100", "125", "146")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr8_gain_plot.png", plot = chr8_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 9
+chr9_samples_loss <- chr9_samples %>% filter(Event == 'loss')
+chr9_samples_gain <- chr9_samples %>% filter(Event == 'gain')
+
+chr9_start = 0
+chr9_end = chr_size %>% filter(Chr == 9) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr9_start to chr9_end (binning because otherwise too data intensive to plot)
+chr9_loss_frequency <- data.frame(position = seq(chr9_start, chr9_end, by = 85000))
+
+if (chr9_loss_frequency$position[length(chr9_loss_frequency$position)] < chr9_end) {
+  chr9_loss_frequency <- rbind(chr9_loss_frequency, data.frame(position = chr9_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr9_loss_frequency$count <- 0
+
+# Loop through each row in chr9_samples_loss
+for (i in 1:nrow(chr9_samples_loss)) {
+  start_position <- chr9_samples_loss$Start[i]
+  end_position <- chr9_samples_loss$End_mod[i]
+
+  # Increment count in chr9_frequency for positions between Start and End_mod
+  chr9_loss_frequency$count[chr9_loss_frequency$position >= start_position & chr9_loss_frequency$position <= end_position] <- 
+    chr9_loss_frequency$count[chr9_loss_frequency$position >= start_position & chr9_loss_frequency$position <= end_position] + 1
+}
+
+chr9_loss_frequency$count <- chr9_loss_frequency$count / 1042
+
+chr9_loss_plot <- ggplot(chr9_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 47500000, 49000000, 50700000, 65000000, 75000000, 100000000, 125000000, 141213431), labels = c("0", "25", "S", "M", "E", "9q12", "75", "100", "125", "141")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr9_loss_plot.png", plot = chr9_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr9 Gains
+# Create a data frame with positions from chr9_start to chr9_end (binning because otherwise too data intensive to plot)
+chr9_gain_frequency <- data.frame(position = seq(chr9_start, chr9_end, by = 85000))
+
+if (chr9_gain_frequency$position[length(chr9_gain_frequency$position)] < chr9_end) {
+  chr9_gain_frequency <- rbind(chr9_gain_frequency, data.frame(position = chr9_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr9_gain_frequency$count <- 0
+
+# Loop through each row in chr9_samples_loss
+for (i in 1:nrow(chr9_samples_gain)) {
+  start_position <- chr9_samples_gain$Start[i]
+  end_position <- chr9_samples_gain$End_mod[i]
+
+  # Increment count in chr9_frequency for positions between Start and End_mod
+  chr9_gain_frequency$count[chr9_gain_frequency$position >= start_position & chr9_gain_frequency$position <= end_position] <- 
+    chr9_gain_frequency$count[chr9_gain_frequency$position >= start_position & chr9_gain_frequency$position <= end_position] + 1
+}
+
+chr9_gain_frequency$count <- chr9_gain_frequency$count / 1042
+
+chr9_gain_plot <- ggplot(chr9_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 47500000, 49000000, 50700000, 65000000, 75000000, 100000000, 125000000, 141213431), labels = c("0", "25", "S", "M", "E", "9q12", "75", "100", "125", "141")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr9_gain_plot.png", plot = chr9_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 10
+chr10_samples_loss <- chr10_samples %>% filter(Event == 'loss')
+chr10_samples_gain <- chr10_samples %>% filter(Event == 'gain')
+
+chr10_start = 0
+chr10_end = chr_size %>% filter(Chr == 10) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr10_start to chr10_end (binning because otherwise too data intensive to plot)
+chr10_loss_frequency <- data.frame(position = seq(chr10_start, chr10_end, by = 85000))
+
+if (chr10_loss_frequency$position[length(chr10_loss_frequency$position)] < chr10_end) {
+  chr10_loss_frequency <- rbind(chr10_loss_frequency, data.frame(position = chr10_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr10_loss_frequency$count <- 0
+
+# Loop through each row in chr10_samples_loss
+for (i in 1:nrow(chr10_samples_loss)) {
+  start_position <- chr10_samples_loss$Start[i]
+  end_position <- chr10_samples_loss$End_mod[i]
+
+  # Increment count in chr10_frequency for positions between Start and End_mod
+  chr10_loss_frequency$count[chr10_loss_frequency$position >= start_position & chr10_loss_frequency$position <= end_position] <- 
+    chr10_loss_frequency$count[chr10_loss_frequency$position >= start_position & chr10_loss_frequency$position <= end_position] + 1
+}
+
+chr10_loss_frequency$count <- chr10_loss_frequency$count / 1042
+
+chr10_loss_plot <- ggplot(chr10_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 39200000, 40200000, 42300000, 50000000, 75000000, 100000000, 135534747), labels = c("0", "25", "S", "M", "E", "50", "75", "100", "136")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr10_loss_plot.png", plot = chr10_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr10 Gains
+# Create a data frame with positions from chr10_start to chr10_end (binning because otherwise too data intensive to plot)
+chr10_gain_frequency <- data.frame(position = seq(chr10_start, chr10_end, by = 85000))
+
+if (chr10_gain_frequency$position[length(chr10_gain_frequency$position)] < chr10_end) {
+  chr10_gain_frequency <- rbind(chr10_gain_frequency, data.frame(position = chr10_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr10_gain_frequency$count <- 0
+
+# Loop through each row in chr10_samples_loss
+for (i in 1:nrow(chr10_samples_gain)) {
+  start_position <- chr10_samples_gain$Start[i]
+  end_position <- chr10_samples_gain$End_mod[i]
+
+  # Increment count in chr10_frequency for positions between Start and End_mod
+  chr10_gain_frequency$count[chr10_gain_frequency$position >= start_position & chr10_gain_frequency$position <= end_position] <- 
+    chr10_gain_frequency$count[chr10_gain_frequency$position >= start_position & chr10_gain_frequency$position <= end_position] + 1
+}
+
+chr10_gain_frequency$count <- chr10_gain_frequency$count / 1042
+
+chr10_gain_plot <- ggplot(chr10_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 39200000, 40200000, 42300000, 50000000, 75000000, 100000000, 135534747), labels = c("0", "25", "S", "M", "E", "50", "75", "100", "136")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr10_gain_plot.png", plot = chr10_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 11
+chr11_samples_loss <- chr11_samples %>% filter(Event == 'loss')
+chr11_samples_gain <- chr11_samples %>% filter(Event == 'gain')
+
+chr11_start = 0
+chr11_end = chr_size %>% filter(Chr == 11) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr11_start to chr11_end (binning because otherwise too data intensive to plot)
+chr11_loss_frequency <- data.frame(position = seq(chr11_start, chr11_end, by = 85000))
+
+if (chr11_loss_frequency$position[length(chr11_loss_frequency$position)] < chr11_end) {
+  chr11_loss_frequency <- rbind(chr11_loss_frequency, data.frame(position = chr11_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr11_loss_frequency$count <- 0
+
+# Loop through each row in chr11_samples_loss
+for (i in 1:nrow(chr11_samples_loss)) {
+  start_position <- chr11_samples_loss$Start[i]
+  end_position <- chr11_samples_loss$End_mod[i]
+
+  # Increment count in chr11_frequency for positions between Start and End_mod
+  chr11_loss_frequency$count[chr11_loss_frequency$position >= start_position & chr11_loss_frequency$position <= end_position] <- 
+    chr11_loss_frequency$count[chr11_loss_frequency$position >= start_position & chr11_loss_frequency$position <= end_position] + 1
+}
+
+chr11_loss_frequency$count <- chr11_loss_frequency$count / 1042
+
+chr11_loss_plot <- ggplot(chr11_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 51600000, 53700000, 54800000, 75000000, 100000000, 135006516), labels = c("0", "25", "S", "M", "E", "75", "100", "135")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr11_loss_plot.png", plot = chr11_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr11 Gains
+# Create a data frame with positions from chr11_start to chr11_end (binning because otherwise too data intensive to plot)
+chr11_gain_frequency <- data.frame(position = seq(chr11_start, chr11_end, by = 85000))
+
+if (chr11_gain_frequency$position[length(chr11_gain_frequency$position)] < chr11_end) {
+  chr11_gain_frequency <- rbind(chr11_gain_frequency, data.frame(position = chr11_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr11_gain_frequency$count <- 0
+
+# Loop through each row in chr11_samples_loss
+for (i in 1:nrow(chr11_samples_gain)) {
+  start_position <- chr11_samples_gain$Start[i]
+  end_position <- chr11_samples_gain$End_mod[i]
+
+  # Increment count in chr11_frequency for positions between Start and End_mod
+  chr11_gain_frequency$count[chr11_gain_frequency$position >= start_position & chr11_gain_frequency$position <= end_position] <- 
+    chr11_gain_frequency$count[chr11_gain_frequency$position >= start_position & chr11_gain_frequency$position <= end_position] + 1
+}
+
+chr11_gain_frequency$count <- chr11_gain_frequency$count / 1042
+
+chr11_gain_plot <- ggplot(chr11_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 51600000, 53700000, 54800000, 75000000, 100000000, 135006516), labels = c("0", "25", "S", "M", "E", "75", "100", "135")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr11_gain_plot.png", plot = chr11_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 12
+chr12_samples_loss <- chr12_samples %>% filter(Event == 'loss')
+chr12_samples_gain <- chr12_samples %>% filter(Event == 'gain')
+
+chr12_start = 0
+chr12_end = chr_size %>% filter(Chr == 12) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr12_start to chr12_end (binning because otherwise too data intensive to plot)
+chr12_loss_frequency <- data.frame(position = seq(chr12_start, chr12_end, by = 80000))
+
+if (chr12_loss_frequency$position[length(chr12_loss_frequency$position)] < chr12_end) {
+  chr12_loss_frequency <- rbind(chr12_loss_frequency, data.frame(position = chr12_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr12_loss_frequency$count <- 0
+
+# Loop through each row in chr12_samples_loss
+for (i in 1:nrow(chr12_samples_loss)) {
+  start_position <- chr12_samples_loss$Start[i]
+  end_position <- chr12_samples_loss$End_mod[i]
+
+  # Increment count in chr12_frequency for positions between Start and End_mod
+  chr12_loss_frequency$count[chr12_loss_frequency$position >= start_position & chr12_loss_frequency$position <= end_position] <- 
+    chr12_loss_frequency$count[chr12_loss_frequency$position >= start_position & chr12_loss_frequency$position <= end_position] + 1
+}
+
+chr12_loss_frequency$count <- chr12_loss_frequency$count / 1042
+
+chr12_loss_plot <- ggplot(chr12_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 33300000, 35800000, 38200000, 50000000, 75000000, 100000000, 133851895), labels = c("0", "25", "S", "M", "E", "50", "75", "100", "134")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr12_loss_plot.png", plot = chr12_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr12 Gains
+# Create a data frame with positions from chr12_start to chr12_end (binning because otherwise too data intensive to plot)
+chr12_gain_frequency <- data.frame(position = seq(chr12_start, chr12_end, by = 80000))
+
+if (chr12_gain_frequency$position[length(chr12_gain_frequency$position)] < chr12_end) {
+  chr12_gain_frequency <- rbind(chr12_gain_frequency, data.frame(position = chr12_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr12_gain_frequency$count <- 0
+
+# Loop through each row in chr12_samples_loss
+for (i in 1:nrow(chr12_samples_gain)) {
+  start_position <- chr12_samples_gain$Start[i]
+  end_position <- chr12_samples_gain$End_mod[i]
+
+  # Increment count in chr12_frequency for positions between Start and End_mod
+  chr12_gain_frequency$count[chr12_gain_frequency$position >= start_position & chr12_gain_frequency$position <= end_position] <- 
+    chr12_gain_frequency$count[chr12_gain_frequency$position >= start_position & chr12_gain_frequency$position <= end_position] + 1
+}
+
+chr12_gain_frequency$count <- chr12_gain_frequency$count / 1042
+
+chr12_gain_plot <- ggplot(chr12_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 33300000, 35800000, 38200000, 50000000, 75000000, 100000000, 133851895), labels = c("0", "25", "S", "M", "E", "50", "75", "100", "134")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr12_gain_plot.png", plot = chr12_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 13
+chr13_samples_loss <- chr13_samples %>% filter(Event == 'loss')
+chr13_samples_gain <- chr13_samples %>% filter(Event == 'gain')
+
+chr13_start = 0
+chr13_end = chr_size %>% filter(Chr == 13) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr13_start to chr13_end (binning because otherwise too data intensive to plot)
+chr13_loss_frequency <- data.frame(position = seq(chr13_start, chr13_end, by = 70000))
+
+if (chr13_loss_frequency$position[length(chr13_loss_frequency$position)] < chr13_end) {
+  chr13_loss_frequency <- rbind(chr13_loss_frequency, data.frame(position = chr13_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr13_loss_frequency$count <- 0
+
+# Loop through each row in chr13_samples_loss
+for (i in 1:nrow(chr13_samples_loss)) {
+  start_position <- chr13_samples_loss$Start[i]
+  end_position <- chr13_samples_loss$End_mod[i]
+
+  # Increment count in chr13_frequency for positions between Start and End_mod
+  chr13_loss_frequency$count[chr13_loss_frequency$position >= start_position & chr13_loss_frequency$position <= end_position] <- 
+    chr13_loss_frequency$count[chr13_loss_frequency$position >= start_position & chr13_loss_frequency$position <= end_position] + 1
+}
+
+chr13_loss_frequency$count <- chr13_loss_frequency$count / 1042
+
+chr13_loss_plot <- ggplot(chr13_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 16300000, 17900000, 19500000, 25000000, 50000000, 75000000, 100000000, 115169878), labels = c("0", "S", "M", "E", "25", "50", "75", "100", "115")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr13_loss_plot.png", plot = chr13_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr13 Gains
+# Create a data frame with positions from chr13_start to chr13_end (binning because otherwise too data intensive to plot)
+chr13_gain_frequency <- data.frame(position = seq(chr13_start, chr13_end, by = 70000))
+
+if (chr13_gain_frequency$position[length(chr13_gain_frequency$position)] < chr13_end) {
+  chr13_gain_frequency <- rbind(chr13_gain_frequency, data.frame(position = chr13_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr13_gain_frequency$count <- 0
+
+# Loop through each row in chr13_samples_loss
+for (i in 1:nrow(chr13_samples_gain)) {
+  start_position <- chr13_samples_gain$Start[i]
+  end_position <- chr13_samples_gain$End_mod[i]
+
+  # Increment count in chr13_frequency for positions between Start and End_mod
+  chr13_gain_frequency$count[chr13_gain_frequency$position >= start_position & chr13_gain_frequency$position <= end_position] <- 
+    chr13_gain_frequency$count[chr13_gain_frequency$position >= start_position & chr13_gain_frequency$position <= end_position] + 1
+}
+
+chr13_gain_frequency$count <- chr13_gain_frequency$count / 1042
+
+chr13_gain_plot <- ggplot(chr13_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 16300000, 17900000, 19500000, 25000000, 50000000, 75000000, 100000000, 115169878), labels = c("0", "S", "M", "E", "25", "50", "75", "100", "115")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr13_gain_plot.png", plot = chr13_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 14
+chr14_samples_loss <- chr14_samples %>% filter(Event == 'loss')
+chr14_samples_gain <- chr14_samples %>% filter(Event == 'gain')
+
+chr14_start = 0
+chr14_end = chr_size %>% filter(Chr == 14) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr14_start to chr14_end (binning because otherwise too data intensive to plot)
+chr14_loss_frequency <- data.frame(position = seq(chr14_start, chr14_end, by = 70000))
+
+if (chr14_loss_frequency$position[length(chr14_loss_frequency$position)] < chr14_end) {
+  chr14_loss_frequency <- rbind(chr14_loss_frequency, data.frame(position = chr14_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr14_loss_frequency$count <- 0
+
+# Loop through each row in chr14_samples_loss
+for (i in 1:nrow(chr14_samples_loss)) {
+  start_position <- chr14_samples_loss$Start[i]
+  end_position <- chr14_samples_loss$End_mod[i]
+
+  # Increment count in chr14_frequency for positions between Start and End_mod
+  chr14_loss_frequency$count[chr14_loss_frequency$position >= start_position & chr14_loss_frequency$position <= end_position] <- 
+    chr14_loss_frequency$count[chr14_loss_frequency$position >= start_position & chr14_loss_frequency$position <= end_position] + 1
+}
+
+chr14_loss_frequency$count <- chr14_loss_frequency$count / 1042
+
+chr14_loss_plot <- ggplot(chr14_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 16100000, 17600000, 19100000, 25000000, 50000000, 75000000, 107349540), labels = c("0", "S", "M", "E", "25", "50", "75", "107")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr14_loss_plot.png", plot = chr14_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr14 Gains
+# Create a data frame with positions from chr14_start to chr14_end (binning because otherwise too data intensive to plot)
+chr14_gain_frequency <- data.frame(position = seq(chr14_start, chr14_end, by = 70000))
+
+if (chr14_gain_frequency$position[length(chr14_gain_frequency$position)] < chr14_end) {
+  chr14_gain_frequency <- rbind(chr14_gain_frequency, data.frame(position = chr14_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr14_gain_frequency$count <- 0
+
+# Loop through each row in chr14_samples_loss
+for (i in 1:nrow(chr14_samples_gain)) {
+  start_position <- chr14_samples_gain$Start[i]
+  end_position <- chr14_samples_gain$End_mod[i]
+
+  # Increment count in chr14_frequency for positions between Start and End_mod
+  chr14_gain_frequency$count[chr14_gain_frequency$position >= start_position & chr14_gain_frequency$position <= end_position] <- 
+    chr14_gain_frequency$count[chr14_gain_frequency$position >= start_position & chr14_gain_frequency$position <= end_position] + 1
+}
+
+chr14_gain_frequency$count <- chr14_gain_frequency$count / 1042
+
+chr14_gain_plot <- ggplot(chr14_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 16100000, 17600000, 19100000, 25000000, 50000000, 75000000, 107349540), labels = c("0", "S", "M", "E", "25", "50", "75", "107")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr14_gain_plot.png", plot = chr14_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 15
+chr15_samples_loss <- chr15_samples %>% filter(Event == 'loss')
+chr15_samples_gain <- chr15_samples %>% filter(Event == 'gain')
+
+chr15_start = 0
+chr15_end = chr_size %>% filter(Chr == 15) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr15_start to chr15_end (binning because otherwise too data intensive to plot)
+chr15_loss_frequency <- data.frame(position = seq(chr15_start, chr15_end, by = 65000))
+
+if (chr15_loss_frequency$position[length(chr15_loss_frequency$position)] < chr15_end) {
+  chr15_loss_frequency <- rbind(chr15_loss_frequency, data.frame(position = chr15_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr15_loss_frequency$count <- 0
+
+# Loop through each row in chr15_samples_loss
+for (i in 1:nrow(chr15_samples_loss)) {
+  start_position <- chr15_samples_loss$Start[i]
+  end_position <- chr15_samples_loss$End_mod[i]
+
+  # Increment count in chr15_frequency for positions between Start and End_mod
+  chr15_loss_frequency$count[chr15_loss_frequency$position >= start_position & chr15_loss_frequency$position <= end_position] <- 
+    chr15_loss_frequency$count[chr15_loss_frequency$position >= start_position & chr15_loss_frequency$position <= end_position] + 1
+}
+
+chr15_loss_frequency$count <- chr15_loss_frequency$count / 1042
+
+chr15_loss_plot <- ggplot(chr15_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 15800000, 19000000, 20700000, 25000000, 50000000, 75000000, 102531392), labels = c("0", "S", "M", "E", "25", "50", "75", "103")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr15_loss_plot.png", plot = chr15_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr15 Gains
+# Create a data frame with positions from chr15_start to chr15_end (binning because otherwise too data intensive to plot)
+chr15_gain_frequency <- data.frame(position = seq(chr15_start, chr15_end, by = 65000))
+
+if (chr15_gain_frequency$position[length(chr15_gain_frequency$position)] < chr15_end) {
+  chr15_gain_frequency <- rbind(chr15_gain_frequency, data.frame(position = chr15_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr15_gain_frequency$count <- 0
+
+# Loop through each row in chr15_samples_loss
+for (i in 1:nrow(chr15_samples_gain)) {
+  start_position <- chr15_samples_gain$Start[i]
+  end_position <- chr15_samples_gain$End_mod[i]
+
+  # Increment count in chr15_frequency for positions between Start and End_mod
+  chr15_gain_frequency$count[chr15_gain_frequency$position >= start_position & chr15_gain_frequency$position <= end_position] <- 
+    chr15_gain_frequency$count[chr15_gain_frequency$position >= start_position & chr15_gain_frequency$position <= end_position] + 1
+}
+
+chr15_gain_frequency$count <- chr15_gain_frequency$count / 1042
+
+chr15_gain_plot <- ggplot(chr15_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 15800000, 19000000, 20700000, 25000000, 50000000, 75000000, 102531392), labels = c("0", "S", "M", "E", "25", "50", "75", "103")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr15_gain_plot.png", plot = chr15_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 16
+chr16_samples_loss <- chr16_samples %>% filter(Event == 'loss')
+chr16_samples_gain <- chr16_samples %>% filter(Event == 'gain')
+
+chr16_start = 0
+chr16_end = chr_size %>% filter(Chr == 16) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr16_start to chr16_end (binning because otherwise too data intensive to plot)
+chr16_loss_frequency <- data.frame(position = seq(chr16_start, chr16_end, by = 55000))
+
+if (chr16_loss_frequency$position[length(chr16_loss_frequency$position)] < chr16_end) {
+  chr16_loss_frequency <- rbind(chr16_loss_frequency, data.frame(position = chr16_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr16_loss_frequency$count <- 0
+
+# Loop through each row in chr16_samples_loss
+for (i in 1:nrow(chr16_samples_loss)) {
+  start_position <- chr16_samples_loss$Start[i]
+  end_position <- chr16_samples_loss$End_mod[i]
+
+  # Increment count in chr16_frequency for positions between Start and End_mod
+  chr16_loss_frequency$count[chr16_loss_frequency$position >= start_position & chr16_loss_frequency$position <= end_position] <- 
+    chr16_loss_frequency$count[chr16_loss_frequency$position >= start_position & chr16_loss_frequency$position <= end_position] + 1
+}
+
+chr16_loss_frequency$count <- chr16_loss_frequency$count / 1042
+
+chr16_loss_plot <- ggplot(chr16_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 34600000, 36600000, 38600000, 47000000, 50000000, 75000000, 90354753), labels = c("0", "25", "S", "M", "E", "16q11.2", "50", "75", "90")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr16_loss_plot.png", plot = chr16_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr16 Gains
+# Create a data frame with positions from chr16_start to chr16_end (binning because otherwise too data intensive to plot)
+chr16_gain_frequency <- data.frame(position = seq(chr16_start, chr16_end, by = 55000))
+
+if (chr16_gain_frequency$position[length(chr16_gain_frequency$position)] < chr16_end) {
+  chr16_gain_frequency <- rbind(chr16_gain_frequency, data.frame(position = chr16_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr16_gain_frequency$count <- 0
+
+# Loop through each row in chr16_samples_loss
+for (i in 1:nrow(chr16_samples_gain)) {
+  start_position <- chr16_samples_gain$Start[i]
+  end_position <- chr16_samples_gain$End_mod[i]
+
+  # Increment count in chr16_frequency for positions between Start and End_mod
+  chr16_gain_frequency$count[chr16_gain_frequency$position >= start_position & chr16_gain_frequency$position <= end_position] <- 
+    chr16_gain_frequency$count[chr16_gain_frequency$position >= start_position & chr16_gain_frequency$position <= end_position] + 1
+}
+
+chr16_gain_frequency$count <- chr16_gain_frequency$count / 1042
+
+chr16_gain_plot <- ggplot(chr16_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 25000000, 34600000, 36600000, 38600000, 47000000, 50000000, 75000000, 90354753), labels = c("0", "25", "S", "M", "E", "16q11.2", "50", "75", "90")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr16_gain_plot.png", plot = chr16_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 17
+chr17_samples_loss <- chr17_samples %>% filter(Event == 'loss')
+chr17_samples_gain <- chr17_samples %>% filter(Event == 'gain')
+
+chr17_start = 0
+chr17_end = chr_size %>% filter(Chr == 17) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr17_start to chr17_end (binning because otherwise too data intensive to plot)
+chr17_loss_frequency <- data.frame(position = seq(chr17_start, chr17_end, by = 50000))
+
+if (chr17_loss_frequency$position[length(chr17_loss_frequency$position)] < chr17_end) {
+  chr17_loss_frequency <- rbind(chr17_loss_frequency, data.frame(position = chr17_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr17_loss_frequency$count <- 0
+
+# Loop through each row in chr17_samples_loss
+for (i in 1:nrow(chr17_samples_loss)) {
+  start_position <- chr17_samples_loss$Start[i]
+  end_position <- chr17_samples_loss$End_mod[i]
+
+  # Increment count in chr17_frequency for positions between Start and End_mod
+  chr17_loss_frequency$count[chr17_loss_frequency$position >= start_position & chr17_loss_frequency$position <= end_position] <- 
+    chr17_loss_frequency$count[chr17_loss_frequency$position >= start_position & chr17_loss_frequency$position <= end_position] + 1
+}
+
+chr17_loss_frequency$count <- chr17_loss_frequency$count / 1042
+
+chr17_loss_plot <- ggplot(chr17_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 22300000, 24000000, 25200000, 50000000, 81195210), labels = c("0", "S", "M", "E", "50", "81")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr17_loss_plot.png", plot = chr17_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr17 Gains
+# Create a data frame with positions from chr17_start to chr17_end (binning because otherwise too data intensive to plot)
+chr17_gain_frequency <- data.frame(position = seq(chr17_start, chr17_end, by = 50000))
+
+if (chr17_gain_frequency$position[length(chr17_gain_frequency$position)] < chr17_end) {
+  chr17_gain_frequency <- rbind(chr17_gain_frequency, data.frame(position = chr17_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr17_gain_frequency$count <- 0
+
+# Loop through each row in chr17_samples_loss
+for (i in 1:nrow(chr17_samples_gain)) {
+  start_position <- chr17_samples_gain$Start[i]
+  end_position <- chr17_samples_gain$End_mod[i]
+
+  # Increment count in chr17_frequency for positions between Start and End_mod
+  chr17_gain_frequency$count[chr17_gain_frequency$position >= start_position & chr17_gain_frequency$position <= end_position] <- 
+    chr17_gain_frequency$count[chr17_gain_frequency$position >= start_position & chr17_gain_frequency$position <= end_position] + 1
+}
+
+chr17_gain_frequency$count <- chr17_gain_frequency$count / 1042
+
+chr17_gain_plot <- ggplot(chr17_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 22300000, 24000000, 25200000, 50000000, 81195210), labels = c("0", "S", "M", "E", "50", "81")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr17_gain_plot.png", plot = chr17_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 18
+chr18_samples_loss <- chr18_samples %>% filter(Event == 'loss')
+chr18_samples_gain <- chr18_samples %>% filter(Event == 'gain')
+
+chr18_start = 0
+chr18_end = chr_size %>% filter(Chr == 18) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr18_start to chr18_end (binning because otherwise too data intensive to plot)
+chr18_loss_frequency <- data.frame(position = seq(chr18_start, chr18_end, by = 50000))
+
+if (chr18_loss_frequency$position[length(chr18_loss_frequency$position)] < chr18_end) {
+  chr18_loss_frequency <- rbind(chr18_loss_frequency, data.frame(position = chr18_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr18_loss_frequency$count <- 0
+
+# Loop through each row in chr18_samples_loss
+for (i in 1:nrow(chr18_samples_loss)) {
+  start_position <- chr18_samples_loss$Start[i]
+  end_position <- chr18_samples_loss$End_mod[i]
+
+  # Increment count in chr18_frequency for positions between Start and End_mod
+  chr18_loss_frequency$count[chr18_loss_frequency$position >= start_position & chr18_loss_frequency$position <= end_position] <- 
+    chr18_loss_frequency$count[chr18_loss_frequency$position >= start_position & chr18_loss_frequency$position <= end_position] + 1
+}
+
+chr18_loss_frequency$count <- chr18_loss_frequency$count / 1042
+
+chr18_loss_plot <- ggplot(chr18_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 15400000, 17200000, 18400000, 25000000, 50000000, 78077248), labels = c("0", "S", "M", "E", "25", "50", "78")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr18_loss_plot.png", plot = chr18_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr18 Gains
+# Create a data frame with positions from chr18_start to chr18_end (binning because otherwise too data intensive to plot)
+chr18_gain_frequency <- data.frame(position = seq(chr18_start, chr18_end, by = 50000))
+
+if (chr18_gain_frequency$position[length(chr18_gain_frequency$position)] < chr18_end) {
+  chr18_gain_frequency <- rbind(chr18_gain_frequency, data.frame(position = chr18_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr18_gain_frequency$count <- 0
+
+# Loop through each row in chr18_samples_loss
+for (i in 1:nrow(chr18_samples_gain)) {
+  start_position <- chr18_samples_gain$Start[i]
+  end_position <- chr18_samples_gain$End_mod[i]
+
+  # Increment count in chr18_frequency for positions between Start and End_mod
+  chr18_gain_frequency$count[chr18_gain_frequency$position >= start_position & chr18_gain_frequency$position <= end_position] <- 
+    chr18_gain_frequency$count[chr18_gain_frequency$position >= start_position & chr18_gain_frequency$position <= end_position] + 1
+}
+
+chr18_gain_frequency$count <- chr18_gain_frequency$count / 1042
+
+chr18_gain_plot <- ggplot(chr18_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 15400000, 17200000, 18400000, 25000000, 50000000, 78077248), labels = c("0", "S", "M", "E", "25", "50", "78")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr18_gain_plot.png", plot = chr18_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 19
+chr19_samples_loss <- chr19_samples %>% filter(Event == 'loss')
+chr19_samples_gain <- chr19_samples %>% filter(Event == 'gain')
+
+chr19_start = 0
+chr19_end = chr_size %>% filter(Chr == 19) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr19_start to chr19_end (binning because otherwise too data intensive to plot)
+chr19_loss_frequency <- data.frame(position = seq(chr19_start, chr19_end, by = 35000))
+
+if (chr19_loss_frequency$position[length(chr19_loss_frequency$position)] < chr19_end) {
+  chr19_loss_frequency <- rbind(chr19_loss_frequency, data.frame(position = chr19_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr19_loss_frequency$count <- 0
+
+# Loop through each row in chr19_samples_loss
+for (i in 1:nrow(chr19_samples_loss)) {
+  start_position <- chr19_samples_loss$Start[i]
+  end_position <- chr19_samples_loss$End_mod[i]
+
+  # Increment count in chr19_frequency for positions between Start and End_mod
+  chr19_loss_frequency$count[chr19_loss_frequency$position >= start_position & chr19_loss_frequency$position <= end_position] <- 
+    chr19_loss_frequency$count[chr19_loss_frequency$position >= start_position & chr19_loss_frequency$position <= end_position] + 1
+}
+
+chr19_loss_frequency$count <- chr19_loss_frequency$count / 1042
+
+chr19_loss_plot <- ggplot(chr19_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 24600000, 26500000, 27700000, 50000000, 59128983), labels = c("0", "S", "M", "E", "50", "59")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr19_loss_plot.png", plot = chr19_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr19 Gains
+# Create a data frame with positions from chr19_start to chr19_end (binning because otherwise too data intensive to plot)
+chr19_gain_frequency <- data.frame(position = seq(chr19_start, chr19_end, by = 35000))
+
+if (chr19_gain_frequency$position[length(chr19_gain_frequency$position)] < chr19_end) {
+  chr19_gain_frequency <- rbind(chr19_gain_frequency, data.frame(position = chr19_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr19_gain_frequency$count <- 0
+
+# Loop through each row in chr19_samples_loss
+for (i in 1:nrow(chr19_samples_gain)) {
+  start_position <- chr19_samples_gain$Start[i]
+  end_position <- chr19_samples_gain$End_mod[i]
+
+  # Increment count in chr19_frequency for positions between Start and End_mod
+  chr19_gain_frequency$count[chr19_gain_frequency$position >= start_position & chr19_gain_frequency$position <= end_position] <- 
+    chr19_gain_frequency$count[chr19_gain_frequency$position >= start_position & chr19_gain_frequency$position <= end_position] + 1
+}
+
+chr19_gain_frequency$count <- chr19_gain_frequency$count / 1042
+
+chr19_gain_plot <- ggplot(chr19_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 24600000, 26500000, 27700000, 50000000, 59128983), labels = c("0", "S", "M", "E", "50", "59")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr19_gain_plot.png", plot = chr19_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 20
+chr20_samples_loss <- chr20_samples %>% filter(Event == 'loss')
+chr20_samples_gain <- chr20_samples %>% filter(Event == 'gain')
+
+chr20_start = 0
+chr20_end = chr_size %>% filter(Chr == 20) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr20_start to chr20_end (binning because otherwise too data intensive to plot)
+chr20_loss_frequency <- data.frame(position = seq(chr20_start, chr20_end, by = 40000))
+
+if (chr20_loss_frequency$position[length(chr20_loss_frequency$position)] < chr20_end) {
+  chr20_loss_frequency <- rbind(chr20_loss_frequency, data.frame(position = chr20_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr20_loss_frequency$count <- 0
+
+# Loop through each row in chr20_samples_loss
+for (i in 1:nrow(chr20_samples_loss)) {
+  start_position <- chr20_samples_loss$Start[i]
+  end_position <- chr20_samples_loss$End_mod[i]
+
+  # Increment count in chr20_frequency for positions between Start and End_mod
+  chr20_loss_frequency$count[chr20_loss_frequency$position >= start_position & chr20_loss_frequency$position <= end_position] <- 
+    chr20_loss_frequency$count[chr20_loss_frequency$position >= start_position & chr20_loss_frequency$position <= end_position] + 1
+}
+
+chr20_loss_frequency$count <- chr20_loss_frequency$count / 1042
+
+chr20_loss_plot <- ggplot(chr20_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 26300000, 27500000, 29400000, 50000000, 63025520), labels = c("0", "S", "M", "E", "50", "63")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr20_loss_plot.png", plot = chr20_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr20 Gains
+# Create a data frame with positions from chr20_start to chr20_end (binning because otherwise too data intensive to plot)
+chr20_gain_frequency <- data.frame(position = seq(chr20_start, chr20_end, by = 40000))
+
+if (chr20_gain_frequency$position[length(chr20_gain_frequency$position)] < chr20_end) {
+  chr20_gain_frequency <- rbind(chr20_gain_frequency, data.frame(position = chr20_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr20_gain_frequency$count <- 0
+
+# Loop through each row in chr20_samples_loss
+for (i in 1:nrow(chr20_samples_gain)) {
+  start_position <- chr20_samples_gain$Start[i]
+  end_position <- chr20_samples_gain$End_mod[i]
+
+  # Increment count in chr20_frequency for positions between Start and End_mod
+  chr20_gain_frequency$count[chr20_gain_frequency$position >= start_position & chr20_gain_frequency$position <= end_position] <- 
+    chr20_gain_frequency$count[chr20_gain_frequency$position >= start_position & chr20_gain_frequency$position <= end_position] + 1
+}
+
+chr20_gain_frequency$count <- chr20_gain_frequency$count / 1042
+
+chr20_gain_plot <- ggplot(chr20_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 26300000, 27500000, 29400000, 50000000, 63025520), labels = c("0", "S", "M", "E", "50", "63")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr20_gain_plot.png", plot = chr20_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 21
+chr21_samples_loss <- chr21_samples %>% filter(Event == 'loss')
+chr21_samples_gain <- chr21_samples %>% filter(Event == 'gain')
+
+chr21_start = 0
+chr21_end = chr_size %>% filter(Chr == 21) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr21_start to chr21_end (binning because otherwise too data intensive to plot)
+chr21_loss_frequency <- data.frame(position = seq(chr21_start, chr21_end, by = 30000))
+
+if (chr21_loss_frequency$position[length(chr21_loss_frequency$position)] < chr21_end) {
+  chr21_loss_frequency <- rbind(chr21_loss_frequency, data.frame(position = chr21_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr21_loss_frequency$count <- 0
+
+# Loop through each row in chr21_samples_loss
+for (i in 1:nrow(chr21_samples_loss)) {
+  start_position <- chr21_samples_loss$Start[i]
+  end_position <- chr21_samples_loss$End_mod[i]
+
+  # Increment count in chr21_frequency for positions between Start and End_mod
+  chr21_loss_frequency$count[chr21_loss_frequency$position >= start_position & chr21_loss_frequency$position <= end_position] <- 
+    chr21_loss_frequency$count[chr21_loss_frequency$position >= start_position & chr21_loss_frequency$position <= end_position] + 1
+}
+
+chr21_loss_frequency$count <- chr21_loss_frequency$count / 1042
+
+chr21_loss_plot <- ggplot(chr21_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 11300000, 13200000, 14300000, 25000000, 48129895), labels = c("0", "S", "M", "E", "25", "48")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr21_loss_plot.png", plot = chr21_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr21 Gains
+# Create a data frame with positions from chr21_start to chr21_end (binning because otherwise too data intensive to plot)
+chr21_gain_frequency <- data.frame(position = seq(chr21_start, chr21_end, by = 30000))
+
+if (chr21_gain_frequency$position[length(chr21_gain_frequency$position)] < chr21_end) {
+  chr21_gain_frequency <- rbind(chr21_gain_frequency, data.frame(position = chr21_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr21_gain_frequency$count <- 0
+
+# Loop through each row in chr21_samples_loss
+for (i in 1:nrow(chr21_samples_gain)) {
+  start_position <- chr21_samples_gain$Start[i]
+  end_position <- chr21_samples_gain$End_mod[i]
+
+  # Increment count in chr21_frequency for positions between Start and End_mod
+  chr21_gain_frequency$count[chr21_gain_frequency$position >= start_position & chr21_gain_frequency$position <= end_position] <- 
+    chr21_gain_frequency$count[chr21_gain_frequency$position >= start_position & chr21_gain_frequency$position <= end_position] + 1
+}
+
+chr21_gain_frequency$count <- chr21_gain_frequency$count / 1042
+
+chr21_gain_plot <- ggplot(chr21_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 11300000, 13200000, 14300000, 25000000, 48129895), labels = c("0", "S", "M", "E", "25", "48")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr21_gain_plot.png", plot = chr21_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Location based plotting of losses and gains - Chromosome 22
+chr22_samples_loss <- chr22_samples %>% filter(Event == 'loss')
+chr22_samples_gain <- chr22_samples %>% filter(Event == 'gain')
+
+chr22_start = 0
+chr22_end = chr_size %>% filter(Chr == 22) %>% select(end) %>% pull()
+
+# Create a data frame with positions from chr22_start to chr22_end (binning because otherwise too data intensive to plot)
+chr22_loss_frequency <- data.frame(position = seq(chr22_start, chr22_end, by = 30000))
+
+if (chr22_loss_frequency$position[length(chr22_loss_frequency$position)] < chr22_end) {
+  chr22_loss_frequency <- rbind(chr22_loss_frequency, data.frame(position = chr22_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr22_loss_frequency$count <- 0
+
+# Loop through each row in chr22_samples_loss
+for (i in 1:nrow(chr22_samples_loss)) {
+  start_position <- chr22_samples_loss$Start[i]
+  end_position <- chr22_samples_loss$End_mod[i]
+
+  # Increment count in chr22_frequency for positions between Start and End_mod
+  chr22_loss_frequency$count[chr22_loss_frequency$position >= start_position & chr22_loss_frequency$position <= end_position] <- 
+    chr22_loss_frequency$count[chr22_loss_frequency$position >= start_position & chr22_loss_frequency$position <= end_position] + 1
+}
+
+chr22_loss_frequency$count <- chr22_loss_frequency$count / 1042
+
+chr22_loss_plot <- ggplot(chr22_loss_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "deepskyblue3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 12200000, 14700000, 17900000, 25000000, 51304566), labels = c("0", "S", "M", "E", "25", "51")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3))
+
+ggsave("/Users/RuchitPatel/Downloads/chr22_loss_plot.png", plot = chr22_loss_plot, width = 10, height = 3, dpi = 1000)
+
+
+# chr22 Gains
+# Create a data frame with positions from chr22_start to chr22_end (binning because otherwise too data intensive to plot)
+chr22_gain_frequency <- data.frame(position = seq(chr22_start, chr22_end, by = 30000))
+
+if (chr22_gain_frequency$position[length(chr22_gain_frequency$position)] < chr22_end) {
+  chr22_gain_frequency <- rbind(chr22_gain_frequency, data.frame(position = chr22_end))
+}
+
+# Add a 'count' variable initialized to 0
+chr22_gain_frequency$count <- 0
+
+# Loop through each row in chr22_samples_loss
+for (i in 1:nrow(chr22_samples_gain)) {
+  start_position <- chr22_samples_gain$Start[i]
+  end_position <- chr22_samples_gain$End_mod[i]
+
+  # Increment count in chr22_frequency for positions between Start and End_mod
+  chr22_gain_frequency$count[chr22_gain_frequency$position >= start_position & chr22_gain_frequency$position <= end_position] <- 
+    chr22_gain_frequency$count[chr22_gain_frequency$position >= start_position & chr22_gain_frequency$position <= end_position] + 1
+}
+
+chr22_gain_frequency$count <- chr22_gain_frequency$count / 1042
+
+chr22_gain_plot <- ggplot(chr22_gain_frequency, aes(x = position, y = count)) +
+  geom_area(fill = "firebrick3") +
+  labs(x = "Position", y = "Count") + 
+  scale_x_continuous(breaks = c(0, 12200000, 14700000, 17900000, 25000000, 51304566), labels = c("0", "S", "M", "E", "25", "51")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=3)) 
+
+ggsave("/Users/RuchitPatel/Downloads/chr22_gain_plot.png", plot = chr22_gain_plot, width = 10, height = 3, dpi = 1000)
+
+```
+
+```{r}
+#Trying to see if specific regions are associated with prognostic changes
+
+no_chr1_bins <- (chr1_end/1000000)
+
+chr1_locations <- seq(0, no_chr1_bins, by = 10)
+chr1_locations <- c(chr1_locations, no_chr1_bins)
+
+#Only keeping small alterations (≤20 Mb)
+
+chr1_samples_loss_filtered <- chr1_samples_loss %>% filter(size_mb <= 20)
+
+# Initialize an empty list to store the resulting dataframes
+chr1_selected_loss_list <- list()
+
+# Loop through each value in chr1_locations except the last one
+for (i in 1:(length(chr1_locations) - 1)) {
+  loc_start <- chr1_locations[i]
+  loc_end <- chr1_locations[i + 1]
+  
+  # Filter the dataframe based on the condition
+  chr1_selected_loss <- chr1_samples_loss_filtered %>%
+    filter((Start / 1000000 >= loc_start & Start / 1000000 <= loc_end) |
+           (End / 1000000 >= loc_start & End / 1000000 <= loc_end))
+  
+  # Assign the filtered dataframe to a variable name dynamically
+  assign(paste0("chr1_selected_loss_", loc_end), chr1_selected_loss)
+  
+  # Store the filtered dataframe in the list
+  chr1_selected_loss_list[[paste0("chr1_selected_loss_", loc_end)]] <- chr1_selected_loss
+}
+
+```
+
+
+```{r}
+# Use Mening_CNV_Arm_Percent script to generate the ig_50_kmc dataframe
+# Once this is generated come back to run this script. The ig_50_kmc list is the samples that we have recurrence data for. We will add information about our small chromosome changes here
+
+chr_select_kmc <- ig_50_kmc
+
+# Create columns for each KMC curve we want to generate at bins along the chromosome
+for (i in 2:length(chr1_locations)) {
+  loc_value <- chr1_locations[i]
+  
+  # Create a new column in chr_select_kmc with name loc_XX, initialized with 0s
+  col_name <- paste0("loc_", loc_value)
+  chr_select_kmc[[col_name]] <- 0
+  
+  # Get the corresponding dataframe
+  df_name <- paste0("chr1_selected_loss_", loc_value)
+  chr1_selected_loss <- chr1_selected_loss_list[[df_name]]
+  
+  # If there are matching "Sample" values, set the corresponding column in chr_select_kmc to 1
+  matching_samples <- chr1_selected_loss$Sample
+  
+  chr_select_kmc[[col_name]] <- ifelse(chr_select_kmc$Sample %in% matching_samples, 1, chr_select_kmc[[col_name]])
+}
+
+#Select rows that are only primary, nonradiated, GTR and have at least 6 mo of follow-up
+chr_select_kmc_test <- chr_select_kmc %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+chr_select_kmc_test <- chr_select_kmc_test %>% filter(months_lastfu >= 6)
+
+
+
+surv_object <- with(chr_select_kmc_test, Surv(months_rec_fu, event = recur_RP))
+km_fit <- survfit(surv_object ~ loc_150, data = chr_select_kmc_test)
+custom_palette <- c("dodgerblue4", "firebrick2")
+
+chr_select_survival <- ggsurvplot(
+  km_fit,
+  data = chr_select_kmc_test,
+  pval = TRUE,
+  conf.int = FALSE,
+  risk.table = "nrisk_cumcensor",
+  risk.table.title = "Progression Status",
+  xlab = "Time (Months)",
+  ylab = "Progression-Free Survival (%)",
+  title = "Progression-Free Survival: 1p Loss Between 140-150 Mb",
+  legend.labs = c("No Focal CNA", "Focal CNA"),
+  palette = custom_palette
+)
+
+
+```
+
+
+
+```{r}
+#Pulling a sample ID list for a region of interest
+
+#Gains
+
+# Assuming loc_start and loc_end are defined
+loc_start <- 44115000
+loc_end <- 44200000
+
+# Create an empty dataframe for selected rows
+chr9_selected_gain <- data.frame()
+
+# Iterate through each row of chr1_samples_loss
+for (i in 1:nrow(chr9_samples_gain)) {
+  row <- chr9_samples_gain[i, ]
+  
+  # Check if any values in the range between Start and End_mod are within loc_start and loc_end
+  if (any(row$Start:row$End_mod %in% loc_start:loc_end)) {
+    # If true, add the entire row to chr1_selected
+    chr9_selected_gain <- dplyr::bind_rows(chr9_selected_gain, row)
+  }
+}
+
+
+#Losses
+
+# Assuming loc_start and loc_end are defined
+loc_start <- 5000000 
+loc_end <- 6700000 
+
+# Create an empty dataframe for selected rows
+chr19_selected_loss <- data.frame()
+
+# Iterate through each row of chr1_samples_loss
+for (i in 1:nrow(chr19_samples_loss)) {
+  row <- chr19_samples_loss[i, ]
+  
+  # Check if any values in the range between Start and End_mod are within loc_start and loc_end
+  if (any(row$Start:row$End_mod %in% loc_start:loc_end)) {
+    # If true, add the entire row to chr1_selected
+    chr19_selected_loss <- dplyr::bind_rows(chr19_selected_loss, row)
+  }
+}
+
+```
+
+```{r}
+# Use Mening_CNV_Arm_Percent script to generate the ig_50_kmc dataframe
+# Once this is generated come back to run this script. The ig_50_kmc list is the samples that we have recurrence data for. We will add information about our small chromosome changes here
+
+chr_select_kmc <- ig_50_kmc
+# chr_reg_target will be the binary if that specific chromosome segment has been gained or lost (generated in the previous chunk)
+chr_select_kmc <- chr_select_kmc %>% mutate(chr_reg_target = 0)
+
+chr_select_kmc <- chr_select_kmc %>% mutate(chr_reg_target = if_else(Sample %in% chr19_selected_loss$Sample, 1, chr_reg_target))
+
+
+#Select rows that are only primary, nonradiated, GTR
+chr_select_kmc <- chr_select_kmc %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+
+chr_select_kmc$dos_conv <- as.Date(chr_select_kmc$DOS_reformat, format = "%m/%d/%Y")
+chr_select_kmc$rec_fu_conv <- as.Date(chr_select_kmc$rec_fu_reformat, format = "%m/%d/%Y")
+
+chr_select_kmc$DOS_reformat <- as.Date(chr_select_kmc$DOS_reformat, format = "%Y-%m-%d")
+chr_select_kmc$DOS_reformat[is.na(chr_select_kmc$DOS_reformat)] <- chr_select_kmc$dos_conv[is.na(chr_select_kmc$DOS_reformat)]
+
+chr_select_kmc$rec_fu_reformat <- as.Date(chr_select_kmc$rec_fu_reformat, format = "%Y-%m-%d")
+chr_select_kmc$rec_fu_reformat[is.na(chr_select_kmc$rec_fu_reformat)] <- chr_select_kmc$rec_fu_conv[is.na(chr_select_kmc$rec_fu_reformat)]
+
+chr_select_kmc <- subset(chr_select_kmc, select = -c(dos_conv, rec_fu_conv))
+
+#Calculate number of months to recurrence or follow-up
+chr_select_kmc$months_rec <- as.numeric(difftime(chr_select_kmc$rec_fu_reformat, chr_select_kmc$DOS_reformat, units = "weeks") / 4.34812)
+chr_select_kmc_filtered <- chr_select_kmc %>% filter(months_rec > 0)
+
+chr_select_kmc_filtered$rec_only <- chr_select_kmc_filtered$rec_fu_reformat
+chr_select_kmc_filtered$rec_only[chr_select_kmc_filtered$recur == 0] <- NA
+
+chr_select_kmc_filtered$months_rec_only <- as.numeric(difftime(chr_select_kmc_filtered$rec_only, chr_select_kmc_filtered$DOS_reformat, units = "weeks") / 4.34812)
+
+#KMC curve for PFS
+
+surv_object <- with(chr_select_kmc_filtered, Surv(months_rec, event = recur_RP))
+km_fit <- survfit(surv_object ~ chr_reg_target, data = chr_select_kmc_filtered)
+custom_palette <- c("dodgerblue4", "firebrick2")
+
+chr_select_survival <- ggsurvplot(
+  km_fit,
+  data = chr_select_kmc_filtered,
+  pval = TRUE,
+  conf.int = FALSE,
+  risk.table = "nrisk_cumcensor",
+  risk.table.title = "Progression Status",
+  xlab = "Time (Months)",
+  ylab = "Survival Probability",
+  title = "Kaplan-Meier Curves for Progression-Free Survival",
+  legend.labs = c("No Chr CNV", "Chr CNV"),
+  palette = custom_palette
+)
+
+
+```
