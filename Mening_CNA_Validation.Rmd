@@ -1,0 +1,384 @@
+---
+title: "Mening_CNA_Validation"
+output: html_document
+date: "2024-06-12"
+---
+
+```{r}
+#This file is dependent on running Mening_CNA_Arm_Percent_Master from the top to ensure packages are loaded into the R environment and data has been processed
+
+#We'll use the fact that we've already generated calls at 5, 25, 50, 75, 95 to see how this causes shifts with integrated score and with menG
+#The necessary arms are already in integrated_grade_5..._95
+#Integrated Score: low=1, intermediate=2, high=3
+
+int_score_5 <- integrated_grade_5 %>% mutate(int_score = case_when(`1p` == 0 ~ 1, `1p` == 1 & `6q` == 1 & `14q` == 1 ~ 3, TRUE ~ 2))
+int_score_25 <- integrated_grade_25 %>% mutate(int_score = case_when(`1p` == 0 ~ 1, `1p` == 1 & `6q` == 1 & `14q` == 1 ~ 3, TRUE ~ 2))
+int_score_50 <- integrated_grade_50 %>% mutate(int_score = case_when(`1p` == 0 ~ 1, `1p` == 1 & `6q` == 1 & `14q` == 1 ~ 3, TRUE ~ 2))
+int_score_75 <- integrated_grade_75 %>% mutate(int_score = case_when(`1p` == 0 ~ 1, `1p` == 1 & `6q` == 1 & `14q` == 1 ~ 3, TRUE ~ 2))
+int_score_95 <- integrated_grade_95 %>% mutate(int_score = case_when(`1p` == 0 ~ 1, `1p` == 1 & `6q` == 1 & `14q` == 1 ~ 3, TRUE ~ 2))
+
+int_score_counts_5 <- table(int_score_5$int_score)
+int_score_counts_25 <- table(int_score_25$int_score)
+int_score_counts_50 <- table(int_score_50$int_score)
+int_score_counts_75 <- table(int_score_75$int_score)
+int_score_counts_95 <- table(int_score_95$int_score)
+
+
+#MenG: no loss of 1p or 22q = 1, loss of 22q but not 1p = 2, loss of 1p = 3
+
+menG_5 <- integrated_grade_5 %>% mutate(menG = case_when(`1p` == 0 & `22q` == 0 ~ 1, `22q` == 1 & `1p` == 0 ~ 2, `1p` == 1 ~ 3))
+menG_25 <- integrated_grade_25 %>% mutate(menG = case_when(`1p` == 0 & `22q` == 0 ~ 1, `22q` == 1 & `1p` == 0 ~ 2, `1p` == 1 ~ 3))
+menG_50 <- integrated_grade_50 %>% mutate(menG = case_when(`1p` == 0 & `22q` == 0 ~ 1, `22q` == 1 & `1p` == 0 ~ 2, `1p` == 1 ~ 3))
+menG_75 <- integrated_grade_75 %>% mutate(menG = case_when(`1p` == 0 & `22q` == 0 ~ 1, `22q` == 1 & `1p` == 0 ~ 2, `1p` == 1 ~ 3))
+menG_95 <- integrated_grade_95 %>% mutate(menG = case_when(`1p` == 0 & `22q` == 0 ~ 1, `22q` == 1 & `1p` == 0 ~ 2, `1p` == 1 ~ 3))
+
+menG_counts_5 <- table(menG_5$menG)
+menG_counts_25 <- table(menG_25$menG)
+menG_counts_50 <- table(menG_50$menG)
+menG_counts_75 <- table(menG_75$menG)
+menG_counts_95 <- table(menG_95$menG)
+
+```
+
+```{r}
+#Run stats on the shifts amongst integrated score and men_G score
+
+int_score_chi <- chisq.test(Int_Score_Shifts_Stats$low, Int_Score_Shifts_Stats$high)
+int_score_pairwise <- pairwise.prop.test(Int_Score_Shifts_Stats$low, Int_Score_Shifts_Stats$total, p.adjust.method = "bonferroni")
+
+menG_score_chi <- chisq.test(menG_Shifts_Stats$low, menG_Shifts_Stats$high)
+menG_score_pairwise <- pairwise.prop.test(menG_Shifts_Stats$low, menG_Shifts_Stats$total, p.adjust.method = "bonferroni")
+
+```
+
+
+```{r}
+#To generate time-dependent ROC, time-dependent AP, and time-dependent Brier prediction curves to discrimination and calibration of Integrated score across thresholds from 0 to 100, we need to generate Integrated Score classification across all thresholds
+
+#First we need to generate a datasheet that has recurrence info, time to recurrence, and IG grades at various thresholds in the sheet
+
+#Calls for all thresholds
+#Initialize datasheet to collect everything
+integrated_score_iterate <- integrated_grade
+integrated_score_iterate <- integrated_score_iterate %>% filter(!is.na(mitoses_binned)) %>% filter(!is.na(CDKN2A)) %>% filter(!is.na(recur))
+integrated_score_iterate <- integrated_score_iterate %>% select(Sample, sample_short, recur)
+
+# Iterate through thresholds from 0 to 100 in increments of 1
+for (threshold in 0:100) {
+  
+  # Create a copy of the original integrated_grade dataframe
+  integrated_grade_x <- integrated_grade
+  
+  # Loop through Samples
+  for (i in 1:nrow(noncont_arm_loss_samples)) {
+    sample_name <- noncont_arm_loss_samples$Sample[i]
+    total_arm_pct <- noncont_arm_loss_samples$total_arm_pct[i]
+    chr_arm <- noncont_arm_loss_samples$Chr_Arm[i]
+    
+    # Find the row in integrated_grade_x that matches the sample name
+    row_index <- which(integrated_grade_x$Sample == sample_name)
+    
+    # If total_arm_pct is greater than or equal to the current threshold, update the corresponding column
+    if (!is.na(row_index) && total_arm_pct >= threshold) {
+      integrated_grade_x[row_index, chr_arm] <- 1
+    }
+  }
+  
+  # Get the index of the last chromosome column
+  index_22q <- which(colnames(integrated_grade_x) == "22q")
+  
+  # Subset the dataframe to keep columns up to the last chromosome column
+  integrated_grade_x <- integrated_grade_x[, 1:index_22q]
+  
+  # Filter Rows
+  integrated_grade_x <- integrated_grade_x %>% filter(!is.na(mitoses_binned)) %>% filter(!is.na(CDKN2A)) %>% filter(!is.na(recur))
+  
+  # Create New Columns
+  integrated_grade_x <- integrated_grade_x %>% mutate(`4p_q` = ifelse(`4p` == 1 | `4q` == 1, 1, 0))
+  integrated_grade_x <- integrated_grade_x %>% mutate(`6p_q` = ifelse(`6p` == 1 | `6q` == 1, 1, 0))
+  integrated_grade_x <- integrated_grade_x %>% mutate(`10p_q` = ifelse(`10p` == 1 | `10q` == 1, 1, 0))
+  integrated_grade_x <- integrated_grade_x %>% mutate(`18p_q` = ifelse(`18p` == 1 | `18q` == 1, 1, 0))
+  integrated_grade_x <- integrated_grade_x %>% mutate(`19p_q` = ifelse(`19p` == 1 | `19q` == 1, 1, 0))
+  
+  # Rename the score and ig columns
+  col_name_score <- paste0("score_", threshold)
+  col_name_ig <- paste0("ig_", threshold)
+  
+  #Calculate Integrated Grade
+  #integrated_grade_x <- integrated_grade_x %>% mutate(!!col_name_score := rowSums(select(., CDKN2A, mitoses_binned, `1p`, `3p`, `4p_q`, `6p_q`, `10p_q`, `14q`, `18p_q`, `19p_q`), na.rm = TRUE))
+  #integrated_grade_x <- integrated_grade_x %>% mutate(!!col_name_ig := ifelse(!!col_name_score <= 1, 1, ifelse(!!col_name_score >= 2 & !!col_name_score <= 3, 2, 3)))
+  
+  integrated_grade_x <- integrated_grade_x %>% mutate(!!col_name_score := case_when(`1p` == 0 ~ 1, `1p` == 1 & `6q` == 1 & `14q` == 1 ~ 3, TRUE ~ 2), na.rm = TRUE)
+  
+  #Remove duplicate samples
+  integrated_grade_x <- integrated_grade_x %>% distinct(sample_short, .keep_all = TRUE)
+  
+  print(threshold)
+  
+  integrated_score_iterate <- left_join(integrated_score_iterate, integrated_grade_x %>% select(Sample, !!col_name_score), by = "Sample")
+}
+
+integrated_score_iterate <- integrated_score_iterate %>% distinct(sample_short, .keep_all = TRUE)
+
+#Convert the score counts to integrated grade, don't need this, already went straight to score above
+#integrated_score_iterate <- integrated_score_iterate %>% mutate_at(vars(starts_with("score_")), ~ case_when(`1p` == 0 ~ 1, `1p` == 1 & `6q` == 1 & `14q` == 1 ~ 3, TRUE ~ 2))
+
+
+#Merge in data on primary, GTR, no radiation to select appropriate rows. Clinical information has not been provided as part of this code chunk due to patient data. Please contact the corresponding author for additional information on access.
+
+#Merge in information on primary, prior RT, GTR, DOS, recdate_ifnorecurthen_lastfudate
+integrated_score_iterate <- integrated_score_iterate %>% filter(!is.na(sample_short)) %>% left_join(unique_mening_master %>% select(CG_merged, primary.y, priorRT, GTR, recur_RP, months_rec_fu, months_lastfu), by = c("sample_short" = "CG_merged")) %>% bind_rows(integrated_score_iterate %>% filter(is.na(sample_short)))
+
+integrated_score_iterate$primary.y <- as.numeric(integrated_score_iterate$primary.y)
+integrated_score_iterate$priorRT <- as.numeric(integrated_score_iterate$priorRT)
+integrated_score_iterate$GTR <- as.numeric(integrated_score_iterate$GTR)
+
+#Select rows that are only primary, nonradiated, GTR with at least 6 mo of follow up
+integrated_score_iterate <- integrated_score_iterate %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+integrated_score_iterate <- integrated_score_iterate %>% filter(months_lastfu >= 6)
+
+```
+
+
+
+```{r}
+#Now we're going to generate time-dependent ROC, time-dependent AP, and time-dependent Brier prediction curves to discrimination and calibration of Integrated Score across thresholds from 0 to 100.
+library(timeROC)
+library(APtools)
+
+#Add in optimal IG threshold values as score_101...removing this for now because not including optimal IG as part of final manuscipt
+#integrated_grade_iterate <- left_join(integrated_grade_iterate, ig_opt_kmc_test %>% select(sample_short, ig), by = "sample_short") %>% rename(score_101 = ig)
+
+# Assuming the data frame is integrated_grade_iterate
+data <- integrated_score_iterate
+
+data_auc <- data.frame(time = 6:96)
+
+for (threshold in 0:100) {
+  col_name_score <- paste0("score_", threshold)
+  roc_result <- timeROC(T=data$months_rec_fu, delta=data$recur_RP, marker = data[[col_name_score]], cause=1, times=seq(6, 96, by = 1))
+  
+  auc_list <- as.data.frame(roc_result$AUC)
+  
+  # Add values to data_auc
+  data_auc <- cbind(data_auc, auc_list)
+
+}
+
+
+colnames(data_auc) <- c("time", paste0(0:100, "_AUC"))
+data_auc[data_auc$time == 0, -1] <- 1
+
+data_long <- gather(data_auc, key = "series", value = "value", -time)
+data_long$series <- factor(data_long$series, levels = paste0(0:100, "_AUC"), ordered = TRUE)
+
+all_auc <- ggplot(data_long, aes(x = time, y = value, color = series)) +
+  geom_line() +
+  labs(title = "Values in data_auc Over Time",
+       x = "Time",
+       y = "Value") +
+  scale_x_continuous(breaks = seq(0,96,12), limits = c(0,96)) +
+  scale_y_continuous(limits=c(0,1.1), breaks = seq(0, 1, 0.2)) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=18), legend.position = "none")
+
+# Select only the desired columns
+selected_columns <- c("5_AUC", "25_AUC", "50_AUC", "75_AUC", "95_AUC", "98_AUC")
+filtered_data_long <- data_long[data_long$series %in% selected_columns, ]
+
+# Plot using ggplot2 with selected columns
+selected_auc_plot <- ggplot(filtered_data_long, aes(x = time, y = value, color = series)) +
+  geom_line(size=1.2) +
+  labs(title = "Values in data_auc Over Time",
+       x = "Time",
+       y = "Value") +
+  scale_color_brewer(palette = "Dark2") +
+  scale_x_continuous(breaks = seq(0,96,12), limits = c(0,96)) +
+  scale_y_continuous(limits=c(0,1.1), breaks = seq(0, 1, 0.2)) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=18)) 
+  
+
+
+
+#Plotting out average precision
+#Assuming the data frame is integrated_grade_iterate
+data <- integrated_score_iterate
+
+data_ap <- data.frame(time = 6:96)
+
+for (threshold in 0:100) {
+  col_name_score <- paste0("score_", threshold)
+  ap_result <- APSurv(stime = data$months_rec_fu, status = data$recur_RP, marker = data[[col_name_score]], t0.list = seq(6, 96, by = 1))
+  
+  ap_list <- as.data.frame(ap_result$ap_summary)
+  ap_list <- ap_list$`AP(t)`
+  
+  # Add values to data_auc
+  data_ap <- cbind(data_ap, ap_list)
+  print(threshold)
+
+}
+
+colnames(data_ap) <- c("time", paste0(0:100, "_AP"))
+data_ap[data_auc$time == 0, -1] <- 0
+
+data_long_ap <- gather(data_ap, key = "series", value = "value", -time)
+data_long_ap$series <- factor(data_long_ap$series, levels = paste0(0:101, "_AP"), ordered = TRUE)
+
+all_ap <- ggplot(data_long_ap, aes(x = time, y = value, color = series)) +
+  geom_line() +
+  labs(title = "Values in data_ap Over Time",
+       x = "Time",
+       y = "Value") +
+  scale_x_continuous(breaks = seq(0,96,12), limits = c(0,96)) +
+  scale_y_continuous(limits=c(0,0.75), breaks = seq(0, 0.75, 0.25)) + 
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=18), legend.position = "none")
+
+# Select only the desired columns
+selected_columns_ap <- c("5_AP", "25_AP", "50_AP", "75_AP", "95_AP", "98_AP")
+filtered_data_long_ap <- data_long_ap[data_long_ap$series %in% selected_columns_ap, ]
+
+# Plot using ggplot2 with selected columns
+selected_ap_plot <- ggplot(filtered_data_long_ap, aes(x = time, y = value, color = series)) +
+  geom_line(size=1.2) +
+  labs(title = "Values in data_ap Over Time",
+       x = "Time",
+       y = "Value") +
+  scale_color_brewer(palette = "Dark2") +
+  scale_x_continuous(breaks = seq(0,96,12), limits = c(0,96)) +
+  scale_y_continuous(limits=c(0,1), breaks = seq(0, 1, 0.25)) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=18)) 
+  
+
+
+#Trying to generete Brier curves now
+ig_filtered <- integrated_score_iterate
+time_list <- seq(6, 96, by = 1)
+data_brier <- data.frame(time = 6:96)
+
+for (threshold in 0:100) {
+  col_name_score <- paste0("score_", threshold)
+  formula_string <- paste("Surv(months_rec_fu, recur_RP)~", col_name_score)
+  Cox_new=coxph(as.formula(formula_string),data=ig_filtered,x=TRUE,y=TRUE)
+
+  brier_results <- brier(fit=Cox_new, times=time_list)
+  brier_format <- as.data.frame(brier_results)
+  brier_format[[col_name_score]] <- brier_format$brier
+  cols_to_remove <- c("rsquared", "brier", "times")
+
+  brier_format <- select(brier_format, -one_of(cols_to_remove))
+  
+  # Add values to data_auc
+  data_brier <- cbind(data_brier, brier_format)
+  print(threshold)
+
+}
+
+data_long_brier <- gather(data_brier, key = "series", value = "value", -time)
+data_long_brier$series <- factor(data_long_brier$series, levels = paste0("score_", 0:100), ordered = TRUE)
+
+all_brier <- ggplot(data_long_brier, aes(x = time, y = value, color = series)) +
+  geom_line() +
+  labs(title = "Brier PE Over Time",
+       x = "Time",
+       y = "Value") +
+  scale_x_continuous(breaks = seq(0,96,12), limits = c(0,96)) +
+  scale_y_continuous(limits=c(0,0.2), breaks = seq(0, 0.2, 0.05)) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=18), legend.position = "none") 
+
+# Select only the desired columns
+selected_columns_brier <- c("score_5", "score_25", "score_50", "score_75", "score_95", "score_98")
+filtered_data_long_brier <- data_long_brier[data_long_brier$series %in% selected_columns_brier, ]
+
+# Plot using ggplot2 with selected columns
+selected_brier_plot <- ggplot(filtered_data_long_brier, aes(x = time, y = value, color = series)) +
+  geom_line(size=1.2) +
+  labs(title = "Values in data_ap Over Time",
+       x = "Time",
+       y = "Value") +
+  scale_color_brewer(palette = "Dark2") +
+  scale_x_continuous(breaks = seq(0,96,12), limits = c(0,96)) +
+  scale_y_continuous(limits=c(0,0.2), breaks = seq(0, 0.2, 0.05)) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=18)) 
+
+```
+
+
+```{r}
+#Extracting some stats from the previous code chunk to figure out if there is a threshold we want to pick/what works the best in the IG classifier
+
+#Finding the threshold with the max AUC at a given timepoint
+
+row_index <- which(data_auc$time == 36) #Adjust based on month timepoint you want to look at
+
+# Extract the values in that row (excluding the "time" column)
+row_values <- data_auc[row_index, -which(names(data_auc) == "time")]
+
+# Find the column name with the maximum value in the specified row
+max_column <- names(data_auc)[-which(names(data_auc) == "time")][which.max(row_values)]
+min_column <- names(data_auc)[-which(names(data_auc) == "time")][which.min(row_values)]
+
+#Calculate the area of the time-dependent AUC curve
+library(pracma)
+
+# Create an empty data frame to store the area under the curve for each series
+area_df <- data.frame(series = character(), area_under_curve = numeric())
+
+# Iterate over series columns (assuming they are in sequential order)
+for (series_col in grep("^\\d+_AUC$", names(data_auc), value = TRUE)) {
+  # Extract the series data
+  series_data <- data_auc[c("time", series_col)]
+  
+  # Use the trapz function to calculate the area under the curve
+  area <- trapz(series_data$time, series_data[[series_col]])
+  
+  # Append the result to the area_df data frame
+  area_df <- rbind(area_df, data.frame(series = series_col, area_under_curve = area))
+}
+
+
+
+#Calculate the area of the time-dependent AP curve
+library(pracma)
+
+# Create an empty data frame to store the area under the curve for each series
+area_ap_df <- data.frame(series = character(), area_under_curve = numeric())
+
+# Iterate over series columns (assuming they are in sequential order)
+for (series_col in grep("^\\d+_AP$", names(data_ap), value = TRUE)) {
+  # Extract the series data
+  series_data <- data_ap[c("time", series_col)]
+  
+  # Use the trapz function to calculate the area under the curve
+  area <- trapz(series_data$time, series_data[[series_col]])
+  
+  # Append the result to the area_df data frame
+  area_ap_df <- rbind(area_ap_df, data.frame(series = series_col, area_under_curve = area))
+}
+
+
+#Calculate the area of the Brier
+library(pracma)
+
+# Create an empty data frame to store the area under the curve for each series
+area_brier_df <- data.frame(series = character(), area_under_curve = numeric())
+
+# Iterate over series columns (assuming they are in sequential order)
+for (series_col in grep("^score_\\d+$", names(data_brier), value = TRUE)) {
+  # Extract the series data
+  series_data <- data_brier[c("time", series_col)]
+  
+  # Use the trapz function to calculate the area under the curve
+  area <- trapz(series_data$time, series_data[[series_col]])
+  
+  # Append the result to the area_df data frame
+  area_brier_df <- rbind(area_brier_df, data.frame(series = series_col, area_under_curve = area))
+}
+
+```
+
