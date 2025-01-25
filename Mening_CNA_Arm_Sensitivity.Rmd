@@ -1,0 +1,489 @@
+---
+title: "Mening_CNA_Arm_Sensitivity"
+output: html_document
+date: "2024-06-20"
+---
+
+```{r}
+#This script helps us understand which arms are most sensitive to CNA thresholds. It is doing time-dependent AUC borrowed from Mening_CNA_Arm_Percent_Master. It requires the ig_hr_XX_test file generated in that code script for each arm in order to be able to perform time dependent calculations for each arm. Those need to be generated in that code-chunk first, along with other dependencies below, before this will run (can also use the chode chunk below to do it). Clinical data has not been included here, please contact the corresponding author
+
+chr_list_total <- c('1p', '1q', '2p', '2q', '3p', '3q', '4p', '4q', '5p', '5q', '6p', '6q', '7p', '7q', '8p', '8q', '9p', '9q', '10p', '10q', '11p', '11q', '12p', '12q', '13q', '14q', '15q', '16p', '16q', '17p', '17q', '18p', '18q', '19p', '19q', '20p', '20q', '21q', '22q')
+
+for (chr_arm in chr_list_total) {
+  integrated_grade_hr_chr <- integrated_grade_hr
+  
+  # Generate column names
+  new_column_names <- paste("score_", 0:100, sep = "")
+  
+  # Add new columns and initialize with 0
+  integrated_grade_hr_chr[new_column_names] <- 0
+  
+  for (sample in integrated_grade_hr_chr$Sample) {
+    sample_rows <- noncont_arm_loss_samples %>% 
+      filter(Sample == sample)
+    
+    if (any(sample_rows$Chr_Arm == chr_arm)) {
+      thresholds <- 0:100
+      
+      for (threshold in thresholds) {
+        col_name <- paste0("score_", threshold)
+        if (any(sample_rows$Chr_Arm == chr_arm & sample_rows$total_arm_pct >= threshold)) {
+          integrated_grade_hr_chr[integrated_grade_hr_chr$Sample == sample, col_name] <- 1
+        } else {
+          integrated_grade_hr_chr[integrated_grade_hr_chr$Sample == sample, col_name] <- 0
+        }
+      }
+    } else {
+      # Move on to the next sample
+      next
+    }
+  }
+  
+  # Clean up data: remove rows where there is no mitoses, CDKN2A, or recurrence data
+  integrated_grade_hr_chr <- integrated_grade_hr_chr %>% filter(!is.na(mitoses_binned)) %>% filter(!is.na(CDKN2A)) %>% filter(!is.na(recur))
+  integrated_grade_hr_chr <- integrated_grade_hr_chr %>% distinct(sample_short, .keep_all = TRUE)
+  
+  # Merge in information on primary, prior RT, GTR
+  integrated_grade_hr_chr <- integrated_grade_hr_chr %>% filter(!is.na(sample_short)) %>% left_join(unique_mening_master %>% select(CG_merged, primary.y, priorRT, GTR), by = c("sample_short" = "CG_merged")) %>% bind_rows(integrated_grade_hr_chr %>% filter(is.na(sample_short)))
+  
+  integrated_grade_hr_chr$primary.y <- as.numeric(integrated_grade_hr_chr$primary.y)
+  integrated_grade_hr_chr$priorRT <- as.numeric(integrated_grade_hr_chr$priorRT)
+  integrated_grade_hr_chr$GTR <- as.numeric(integrated_grade_hr_chr$GTR)
+  
+  # Select rows that are only primary, nonradiated, GTR
+  ig_chr_test <- integrated_grade_hr_chr %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+  ig_chr_loss <- ig_chr_test
+  
+  # Assign the resulting data frame to a variable with a dynamic name
+  assign(paste0("ig_", chr_arm, "_loss"), ig_chr_loss, envir = .GlobalEnv)
+}
+
+
+```
+
+
+```{r}
+#Create ig_hr_1p_test, ig_hr_1q_test, etc up to ig_hr_22q_test to test each arm
+
+integrated_grade_hr_2q <- integrated_grade_hr
+
+# Generate column names
+new_column_names <- paste("2q_", 0:100, sep = "")
+
+# Add new columns and initialize with 0
+integrated_grade_hr_2q[new_column_names] <- 0
+
+for (sample in integrated_grade_hr_2q$Sample) {
+  sample_rows <- noncont_arm_loss_samples %>% 
+    filter(Sample == sample)
+  
+  if (any(sample_rows$Chr_Arm == "2q")) {
+    thresholds <- 0:100
+    
+    for (threshold in thresholds) {
+      if (any(sample_rows$Chr_Arm == "2q" & sample_rows$total_arm_pct >= threshold)) {
+        col_name <- paste0("2q_", threshold)
+        integrated_grade_hr_2q[integrated_grade_hr_2q$Sample == sample, col_name] <- 1
+      } else {
+        col_name <- paste0("2q_", threshold)
+        integrated_grade_hr_2q[integrated_grade_hr_2q$Sample == sample, col_name] <- 0
+      }
+    }
+  } else {
+    # Move on to the next sample
+    next
+  }
+}
+
+#Clean up data: remove rows where there is no mitoses, CDKN2A, or recurrence data
+integrated_grade_hr_2q <- integrated_grade_hr_2q %>% filter(!is.na(mitoses_binned)) %>% filter(!is.na(CDKN2A)) %>% filter(!is.na(recur))
+integrated_grade_hr_2q <- integrated_grade_hr_2q %>% distinct(sample_short, .keep_all = TRUE)
+
+#Merge in information on primary, prior RT, GTR
+integrated_grade_hr_2q <- integrated_grade_hr_2q %>% filter(!is.na(sample_short)) %>% left_join(unique_mening_master %>% select(CG_merged, primary.y, priorRT, GTR), by = c("sample_short" = "CG_merged")) %>% bind_rows(integrated_grade_hr_2q %>% filter(is.na(sample_short)))
+
+integrated_grade_hr_2q$primary.y <- as.numeric(integrated_grade_hr_2q$primary.y)
+integrated_grade_hr_2q$priorRT <- as.numeric(integrated_grade_hr_2q$priorRT)
+integrated_grade_hr_2q$GTR <- as.numeric(integrated_grade_hr_2q$GTR)
+
+#Select rows that are only primary, nonradiated, GTR
+ig_hr_2q_test <- integrated_grade_hr_2q %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+ig_hr_2q_loss <- ig_hr_2q_test
+
+```
+
+
+
+```{r}
+#This script helps us understand which arms are most sensitive to CNA thresholds. It is doing time-dependent AUC borrowed from Mening_CNA_Arm_Percent_Master. It will the dataframese below for each arm loss and gains across all thresholds to begin thinking about AUC calculations
+
+chr_list_total <- c('1p', '1q', '2p', '2q', '3p', '3q', '4p', '4q', '5p', '5q', '6p', '6q', '7p', '7q', '8p', '8q', '9p', '9q', '10p', '10q', '11p', '11q', '12p', '12q', '13q', '14q', '15q', '16p', '16q', '17p', '17q', '18p', '18q', '19p', '19q', '20p', '20q', '21q', '22q')
+
+#Create loss sheets
+for (chr_arm in chr_list_total) {
+  integrated_grade_hr_chr <- integrated_grade_hr
+  
+  # Generate column names
+  new_column_names <- paste("score_", 0:100, sep = "")
+  
+  # Add new columns and initialize with 0
+  integrated_grade_hr_chr[new_column_names] <- 0
+  
+  for (sample in integrated_grade_hr_chr$Sample) {
+    sample_rows <- noncont_arm_loss_samples %>% 
+      filter(Sample == sample)
+    
+    if (any(sample_rows$Chr_Arm == chr_arm)) {
+      thresholds <- 0:100
+      
+      for (threshold in thresholds) {
+        col_name <- paste0("score_", threshold)
+        if (any(sample_rows$Chr_Arm == chr_arm & sample_rows$total_arm_pct >= threshold)) {
+          integrated_grade_hr_chr[integrated_grade_hr_chr$Sample == sample, col_name] <- 1
+        } else {
+          integrated_grade_hr_chr[integrated_grade_hr_chr$Sample == sample, col_name] <- 0
+        }
+      }
+    } else {
+      # Move on to the next sample
+      next
+    }
+  }
+  
+  # Clean up data: remove rows where there is no mitoses, CDKN2A, or recurrence data
+  integrated_grade_hr_chr <- integrated_grade_hr_chr %>% filter(!is.na(mitoses_binned)) %>% filter(!is.na(CDKN2A)) %>% filter(!is.na(recur))
+  integrated_grade_hr_chr <- integrated_grade_hr_chr %>% distinct(sample_short, .keep_all = TRUE)
+  
+  # Merge in information on primary, prior RT, GTR
+  integrated_grade_hr_chr <- integrated_grade_hr_chr %>% filter(!is.na(sample_short)) %>% left_join(unique_mening_master %>% select(CG_merged, primary.y, priorRT, GTR), by = c("sample_short" = "CG_merged")) %>% bind_rows(integrated_grade_hr_chr %>% filter(is.na(sample_short)))
+  
+  integrated_grade_hr_chr$primary.y <- as.numeric(integrated_grade_hr_chr$primary.y)
+  integrated_grade_hr_chr$priorRT <- as.numeric(integrated_grade_hr_chr$priorRT)
+  integrated_grade_hr_chr$GTR <- as.numeric(integrated_grade_hr_chr$GTR)
+  
+  # Select rows that are only primary, nonradiated, GTR
+  ig_chr_test <- integrated_grade_hr_chr %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+  ig_chr_loss <- ig_chr_test
+  
+  # Assign the resulting data frame to a variable with a dynamic name
+  assign(paste0("ig_", chr_arm, "_loss"), ig_chr_loss, envir = .GlobalEnv)
+}
+
+
+
+#Create gain sheets
+for (chr_arm in chr_list_total) {
+  integrated_grade_hr_chr <- integrated_grade_hr
+  
+  # Generate column names
+  new_column_names <- paste("score_", 0:100, sep = "")
+  
+  # Add new columns and initialize with 0
+  integrated_grade_hr_chr[new_column_names] <- 0
+  
+  for (sample in integrated_grade_hr_chr$Sample) {
+    sample_rows <- noncont_arm_gain_samples %>% 
+      filter(Sample == sample)
+    
+    if (any(sample_rows$Chr_Arm == chr_arm)) {
+      thresholds <- 0:100
+      
+      for (threshold in thresholds) {
+        col_name <- paste0("score_", threshold)
+        if (any(sample_rows$Chr_Arm == chr_arm & sample_rows$total_arm_pct >= threshold)) {
+          integrated_grade_hr_chr[integrated_grade_hr_chr$Sample == sample, col_name] <- 1
+        } else {
+          integrated_grade_hr_chr[integrated_grade_hr_chr$Sample == sample, col_name] <- 0
+        }
+      }
+    } else {
+      # Move on to the next sample
+      next
+    }
+  }
+  
+  # Clean up data: remove rows where there is no mitoses, CDKN2A, or recurrence data
+  integrated_grade_hr_chr <- integrated_grade_hr_chr %>% filter(!is.na(mitoses_binned)) %>% filter(!is.na(CDKN2A)) %>% filter(!is.na(recur))
+  integrated_grade_hr_chr <- integrated_grade_hr_chr %>% distinct(sample_short, .keep_all = TRUE)
+  
+  # Merge in information on primary, prior RT, GTR
+  integrated_grade_hr_chr <- integrated_grade_hr_chr %>% filter(!is.na(sample_short)) %>% left_join(unique_mening_master %>% select(CG_merged, primary.y, priorRT, GTR), by = c("sample_short" = "CG_merged")) %>% bind_rows(integrated_grade_hr_chr %>% filter(is.na(sample_short)))
+  
+  integrated_grade_hr_chr$primary.y <- as.numeric(integrated_grade_hr_chr$primary.y)
+  integrated_grade_hr_chr$priorRT <- as.numeric(integrated_grade_hr_chr$priorRT)
+  integrated_grade_hr_chr$GTR <- as.numeric(integrated_grade_hr_chr$GTR)
+  
+  # Select rows that are only primary, nonradiated, GTR
+  ig_chr_test <- integrated_grade_hr_chr %>% filter(primary.y == 1, priorRT == 0, GTR == 1)
+  ig_chr_gain <- ig_chr_test
+  
+  # Assign the resulting data frame to a variable with a dynamic name
+  assign(paste0("ig_", chr_arm, "_gain"), ig_chr_gain, envir = .GlobalEnv)
+}
+
+
+```
+
+
+```{r}
+library(timeROC)
+library(APtools)
+library(pracma)
+
+#Now we're going to generate time-dependent ROC
+#Assuming the data frame is integrated_grade_iterate
+
+data <- ig_7q_loss
+
+data_auc <- data.frame(time = 6:96)
+
+for (threshold in 0:100) {
+  col_name_score <- paste0("score_", threshold)
+  roc_result <- timeROC(T=data$months_rec_fu, delta=data$recur_RP, marker = data[[col_name_score]], cause=1, times=seq(6, 96, by = 1))
+  
+  auc_list <- as.data.frame(roc_result$AUC)
+  
+  # Add values to data_auc
+  data_auc <- cbind(data_auc, auc_list)
+
+}
+
+
+colnames(data_auc) <- c("time", paste0(0:100, "_AUC"))
+data_auc[data_auc$time == 0, -1] <- 1
+
+data_long <- gather(data_auc, key = "series", value = "value", -time)
+data_long$series <- factor(data_long$series, levels = paste0(0:100, "_AUC"), ordered = TRUE)
+
+
+#Calculate the area of the time-dependent AUC curve
+#Create an empty data frame to store the area under the curve for each series
+area_df <- data.frame(series = character(), area_under_curve = numeric())
+
+# Iterate over series columns (assuming they are in sequential order)
+for (series_col in grep("^\\d+_AUC$", names(data_auc), value = TRUE)) {
+  # Extract the series data
+  series_data <- data_auc[c("time", series_col)]
+  
+  # Use the trapz function to calculate the area under the curve
+  area <- trapz(series_data$time, series_data[[series_col]])
+  
+  # Append the result to the area_df data frame
+  area_df <- rbind(area_df, data.frame(series = series_col, area_under_curve = area))
+}
+
+
+```
+
+
+```{r}
+library(dplyr)
+library(timeROC)
+library(pracma)
+library(tidyr)
+
+#For losses, create AUC matrix
+# Initialize the final data frame
+final_auc_loss_df <- data.frame(series = paste0(0:100, "_AUC"))
+
+# Loop through each chromosome arm
+for (chr_arm in chr_list_total) {
+  data <- get(paste0("ig_", chr_arm, "_loss"))
+  
+  data_auc <- data.frame(time = 6:96)
+  
+  for (threshold in 0:100) {
+    col_name_score <- paste0("score_", threshold)
+    roc_result <- timeROC(T=data$months_rec_fu, delta=data$recur_RP, marker = data[[col_name_score]], cause=1, times=seq(6, 96, by = 1))
+    
+    auc_list <- as.data.frame(roc_result$AUC)
+    
+    # Add values to data_auc
+    data_auc <- cbind(data_auc, auc_list)
+  }
+  
+  colnames(data_auc) <- c("time", paste0(0:100, "_AUC"))
+  data_auc[data_auc$time == 0, -1] <- 1
+  
+  data_long <- gather(data_auc, key = "series", value = "value", -time)
+  data_long$series <- factor(data_long$series, levels = paste0(0:100, "_AUC"), ordered = TRUE)
+  
+  # Calculate the area of the time-dependent AUC curve
+  # Create an empty data frame to store the area under the curve for each series
+  area_df <- data.frame(series = character(), area_under_curve = numeric())
+  
+  # Iterate over series columns (assuming they are in sequential order)
+  for (series_col in grep("^\\d+_AUC$", names(data_auc), value = TRUE)) {
+    # Extract the series data
+    series_data <- data_auc[c("time", series_col)]
+    
+    # Use the trapz function to calculate the area under the curve
+    area <- trapz(series_data$time, series_data[[series_col]])
+    
+    # Append the result to the area_df data frame
+    area_df <- rbind(area_df, data.frame(series = series_col, area_under_curve = area))
+  }
+  
+  # Append the results to final_auc_loss_df
+  final_auc_loss_df <- cbind(final_auc_loss_df, setNames(data.frame(area_df$area_under_curve), chr_arm))
+}
+
+
+
+#For gains, create AUC matrix
+# Initialize the final data frame
+final_auc_gain_df <- data.frame(series = paste0(0:100, "_AUC"))
+
+# Loop through each chromosome arm
+for (chr_arm in chr_list_total) {
+  data <- get(paste0("ig_", chr_arm, "_gain"))
+  
+  data_auc <- data.frame(time = 6:96)
+  
+  for (threshold in 0:100) {
+    col_name_score <- paste0("score_", threshold)
+    roc_result <- timeROC(T=data$months_rec_fu, delta=data$recur_RP, marker = data[[col_name_score]], cause=1, times=seq(6, 96, by = 1))
+    
+    auc_list <- as.data.frame(roc_result$AUC)
+    
+    # Add values to data_auc
+    data_auc <- cbind(data_auc, auc_list)
+  }
+  
+  colnames(data_auc) <- c("time", paste0(0:100, "_AUC"))
+  data_auc[data_auc$time == 0, -1] <- 1
+  
+  data_long <- gather(data_auc, key = "series", value = "value", -time)
+  data_long$series <- factor(data_long$series, levels = paste0(0:100, "_AUC"), ordered = TRUE)
+  
+  # Calculate the area of the time-dependent AUC curve
+  # Create an empty data frame to store the area under the curve for each series
+  area_df <- data.frame(series = character(), area_under_curve = numeric())
+  
+  # Iterate over series columns (assuming they are in sequential order)
+  for (series_col in grep("^\\d+_AUC$", names(data_auc), value = TRUE)) {
+    # Extract the series data
+    series_data <- data_auc[c("time", series_col)]
+    
+    # Use the trapz function to calculate the area under the curve
+    area <- trapz(series_data$time, series_data[[series_col]])
+    
+    # Append the result to the area_df data frame
+    area_df <- rbind(area_df, data.frame(series = series_col, area_under_curve = area))
+  }
+  
+  # Append the results to final_auc_gain_df
+  final_auc_gain_df <- cbind(final_auc_gain_df, setNames(data.frame(area_df$area_under_curve), chr_arm))
+}
+
+```
+
+
+```{r}
+#Now lets calculate the CV of each column
+
+#Losses
+row.names(final_auc_loss_df) <- final_auc_loss_df[, 1]
+final_auc_loss_df <- final_auc_loss_df[, -1]
+
+# Add a row for the coefficient of variation (CV)
+cv_values <- sapply(final_auc_loss_df, function(column) {
+  # Calculate the standard deviation and mean for the column
+  std_dev <- sd(column, na.rm = TRUE)
+  mean_val <- mean(column, na.rm = TRUE)
+  
+  # Calculate the CV (standard deviation / mean)
+  cv <- std_dev / mean_val
+  return(cv)
+})
+
+# Append the CV row to final_auc_loss_df
+final_auc_loss_df <- rbind(final_auc_loss_df, cv_values)
+
+# Set the row name for the CV row
+row.names(final_auc_loss_df)[nrow(final_auc_loss_df)] <- "cv"
+
+cv_loss_values <- as.numeric(final_auc_loss_df["cv", ])
+chr_arms <- colnames(final_auc_loss_df)
+
+# Create a data frame with row names and corresponding CV values
+cv_loss_vals <- data.frame(chr_arm = chr_arms, cv_value = cv_loss_values)
+
+
+#Gains
+row.names(final_auc_gain_df) <- final_auc_gain_df[, 1]
+final_auc_gain_df <- final_auc_gain_df[, -1]
+
+# Add a row for the coefficient of variation (CV)
+cv_values <- sapply(final_auc_gain_df, function(column) {
+  # Calculate the standard deviation and mean for the column
+  std_dev <- sd(column, na.rm = TRUE)
+  mean_val <- mean(column, na.rm = TRUE)
+  
+  # Calculate the CV (standard deviation / mean)
+  cv <- std_dev / mean_val
+  return(cv)
+})
+
+# Append the CV row to final_auc_gain_df
+final_auc_gain_df <- rbind(final_auc_gain_df, cv_values)
+
+# Set the row name for the CV row
+row.names(final_auc_gain_df)[nrow(final_auc_gain_df)] <- "cv"
+
+cv_gain_values <- as.numeric(final_auc_gain_df["cv", ])
+chr_arms <- colnames(final_auc_gain_df)
+
+# Create a data frame with row names and corresponding CV values
+cv_gain_vals <- data.frame(chr_arm = chr_arms, cv_value = cv_gain_values)
+
+```
+
+
+```{r}
+#Plot CV losses and determine which are out of the 95% CI
+cv_loss_mean <- mean(cv_loss_vals$cv_value)
+cv_loss_sd <- sd(cv_loss_vals$cv_value)
+
+# Calculate 95% confidence interval
+ci_loss <- t.test(cv_loss_vals$cv_value)$conf.int
+
+# Create the ggplot scatter plot
+
+cv_loss_vals$chr_arm <- factor(cv_loss_vals$chr_arm, levels = chr_list_total)
+
+ci_loss_shade <- geom_rect(aes(xmin = as.numeric(chr_arm) - 0.45, xmax = as.numeric(chr_arm) + 0.45, ymin = 0, ymax = ci_loss[2]),
+                      fill = "grey", alpha = 0.2)
+
+cv_loss_plot <- ggplot(cv_loss_vals, aes(x = chr_arm, y = cv_value)) +
+  geom_point(size = 5, color = "deepskyblue3") +
+  ci_loss_shade +  # Add shaded confidence interval
+  labs(x = "Chromosome Arm", y = "Coefficient of Variation (CV)",
+       title = "CV Values for Chromsome Arm Losses Across Thresholds") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=18), axis.title = element_text(size = 18), legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(hjust = 0.5, size = 18)) +
+  scale_y_continuous(breaks = seq(0, 0.1, by = 0.025), limits = c(0,0.1))
+
+
+#Plot CV gains and determine which are out of the 95% CI
+cv_gain_mean <- mean(cv_gain_vals$cv_value)
+cv_gain_sd <- sd(cv_gain_vals$cv_value)
+
+# Calculate 95% confidence interval
+ci_gain <- t.test(cv_gain_vals$cv_value)$conf.int
+
+# Create the ggplot scatter plot
+
+cv_gain_vals$chr_arm <- factor(cv_gain_vals$chr_arm, levels = chr_list_total)
+
+ci_gain_shade <- geom_rect(aes(xmin = as.numeric(chr_arm) - 0.45, xmax = as.numeric(chr_arm) + 0.45, ymin = 0, ymax = ci_gain[2]),
+                      fill = "grey", alpha = 0.2)
+
+cv_gain_plot <- ggplot(cv_gain_vals, aes(x = chr_arm, y = cv_value)) +
+  geom_point(size = 5, color = "firebrick3") +
+  ci_gain_shade +  # Add shaded confidence interval
+  labs(x = "Chromosome Arm", y = "Coefficient of Variation (CV)",
+       title = "CV Values for Chromsome Arm Gains Across Thresholds") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=18), axis.title = element_text(size = 18), legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(hjust = 0.5, size = 18)) +
+  scale_y_continuous(breaks = seq(0, 0.075, by = 0.025), limits = c(0,0.075))
+
+```
