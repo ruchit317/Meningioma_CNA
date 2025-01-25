@@ -1,0 +1,295 @@
+---
+title: "Primary_Recurrent_CNA"
+author: "Ruchit Patel"
+date: "2023-09-25"
+output: html_document
+---
+
+```{r}
+library(patchwork)
+#THIS depends on output from Mening_CNA_Arm_Percent_Master.Rmd. Specifically, it needs the noncont_arm_loss_samples and noncont_arm_gain_samples dataframes and the barcode datasheet imported. And it needs barcode file, also in Mening_CNA_Arm_Percent_Master.Rmd. Script has been modified to remove barcodes for public upload. Please contact the corresponding author with any questions.
+
+# Extract part from "CG" onward for each row, this will not be present if publicly available data is utilized, modify as necessary
+prim_rec_loss <- noncont_arm_loss_samples
+
+prim_rec_loss <- prim_rec_loss %>% mutate(sample_short = str_sub(Sample, start = str_locate(Sample, "CG")[, "start"]))
+
+prim_rec_loss <- prim_rec_loss %>% mutate(barcode_extract = str_extract(Sample, "(?<=US83003520_)\\d+"))
+prim_rec_loss <- merge(prim_rec_loss, barcode, by.x = "barcode_extract", by.y = "barcode", all.x = TRUE)
+prim_rec_loss <- prim_rec_loss %>% mutate(sample_short = ifelse(!is.na(barcode_extract), cg_val, sample_short))
+prim_rec_loss <- prim_rec_loss %>% select(-c(barcode_extract, cg_val))
+
+
+prim_rec_gain <- noncont_arm_gain_samples
+
+prim_rec_gain <- prim_rec_gain %>% mutate(sample_short = str_sub(Sample, start = str_locate(Sample, "CG")[, "start"]))
+
+prim_rec_gain <- prim_rec_gain %>% mutate(barcode_extract = str_extract(Sample, "(?<=US83003520_)\\d+"))
+prim_rec_gain <- merge(prim_rec_gain, barcode, by.x = "barcode_extract", by.y = "barcode", all.x = TRUE)
+prim_rec_gain <- prim_rec_gain %>% mutate(sample_short = ifelse(!is.na(barcode_extract), cg_val, sample_short))
+prim_rec_gain <- prim_rec_gain %>% select(-c(barcode_extract, cg_val))
+```
+
+```{r}
+#Selecting only the paired primary and recurrent samples (13 total)
+
+primary_names = c("MN_047", "MN_161", "MN_135", "MN_154", "MN_230", "MN_028", "MN_053", "MN_139", "MN_143", "MN_229", "MN_838", "MN_502", "MN_539")
+
+recurrent_names = c("MN_591", "MN_653", "MN_391", "MN_679", "MN_212", "MN_866", "MN_646", "MN_094", "MN_273", "MN_845", "MN_839", "MN_681", "MN_803")
+
+prim_rec_loss <- prim_rec_loss %>% filter(sample_short %in% primary_names | sample_short %in% recurrent_names) %>% mutate(primary = ifelse(sample_short %in% primary_names, 1, 0))
+
+prim_rec_gain <- prim_rec_gain %>% filter(sample_short %in% primary_names | sample_short %in% recurrent_names) %>% mutate(primary = ifelse(sample_short %in% primary_names, 1, 0))
+```
+
+```{r}
+# Create an empty "identifier" column
+prim_rec_loss$identifier <- ""
+
+# Iterate through primary_names and set the "identifier" column
+for (i in 1:13) {
+  prim_rec_loss$identifier[prim_rec_loss$sample_short == primary_names[i]] <- paste0("PR", i)
+}
+
+# Iterate through recurrent_names and set the "identifier" column
+for (i in 1:13) {
+  prim_rec_loss$identifier[prim_rec_loss$sample_short == recurrent_names[i]] <- paste0("PR", i)
+}
+
+
+# Create an empty "identifier" column
+prim_rec_gain$identifier <- ""
+
+# Iterate through primary_names and set the "identifier" column
+for (i in 1:13) {
+  prim_rec_gain$identifier[prim_rec_gain$sample_short == primary_names[i]] <- paste0("PR", i)
+}
+
+# Iterate through recurrent_names and set the "identifier" column
+for (i in 1:13) {
+  prim_rec_gain$identifier[prim_rec_gain$sample_short == recurrent_names[i]] <- paste0("PR", i)
+}
+
+```
+
+```{r}
+# Ensure that any 0 values are plotted (e.g., should be pairs of dots for primary/recurrent)
+
+prim_rec_loss_mod <- data.frame()
+
+# Loop through identifier values from PR1 to PR13
+for (i in 1:13) {
+  identifier_value <- paste0("PR", i)
+  
+  # Filter the data for the current identifier
+  subset_data <- prim_rec_loss %>% filter(identifier == identifier_value)
+  
+  # Find unique Chr_Arm values for primary = 1 and primary = 0
+  unique_chr_arm_1 <- setdiff(subset_data$Chr_Arm[subset_data$primary == 1], subset_data$Chr_Arm[subset_data$primary == 0])
+  unique_chr_arm_0 <- setdiff(subset_data$Chr_Arm[subset_data$primary == 0], subset_data$Chr_Arm[subset_data$primary == 1])
+  
+# Check if new rows need to be created
+  if (length(unique_chr_arm_1) > 0) {
+    new_rows_1 <- data.frame(
+      identifier = identifier_value,
+      primary = 0,
+      Chr_Arm = unique_chr_arm_1,
+      total_arm_pct = 0
+    )
+  } else {
+    new_rows_1 <- NULL
+  }
+  
+  if (length(unique_chr_arm_0) > 0) {
+    new_rows_0 <- data.frame(
+      identifier = identifier_value,
+      primary = 1,
+      Chr_Arm = unique_chr_arm_0,
+      total_arm_pct = 0
+    )
+  } else {
+    new_rows_0 <- NULL
+  }
+  
+  # Combine new rows with the original data
+  prim_rec_loss_mod <- bind_rows(prim_rec_loss_mod, subset_data, new_rows_1, new_rows_0)
+}
+
+
+prim_rec_gain_mod <- data.frame()
+
+# Loop through identifier values from PR1 to PR13
+for (i in 1:13) {
+  identifier_value <- paste0("PR", i)
+  
+  # Filter the data for the current identifier
+  subset_data <- prim_rec_gain %>% filter(identifier == identifier_value)
+  
+  # Find unique Chr_Arm values for primary = 1 and primary = 0
+  unique_chr_arm_1 <- setdiff(subset_data$Chr_Arm[subset_data$primary == 1], subset_data$Chr_Arm[subset_data$primary == 0])
+  unique_chr_arm_0 <- setdiff(subset_data$Chr_Arm[subset_data$primary == 0], subset_data$Chr_Arm[subset_data$primary == 1])
+  
+# Check if new rows need to be created
+  if (length(unique_chr_arm_1) > 0) {
+    new_rows_1 <- data.frame(
+      identifier = identifier_value,
+      primary = 0,
+      Chr_Arm = unique_chr_arm_1,
+      total_arm_pct = 0
+    )
+  } else {
+    new_rows_1 <- NULL
+  }
+  
+  if (length(unique_chr_arm_0) > 0) {
+    new_rows_0 <- data.frame(
+      identifier = identifier_value,
+      primary = 1,
+      Chr_Arm = unique_chr_arm_0,
+      total_arm_pct = 0
+    )
+  } else {
+    new_rows_0 <- NULL
+  }
+  
+  # Combine new rows with the original data
+  prim_rec_gain_mod <- bind_rows(prim_rec_gain_mod, subset_data, new_rows_1, new_rows_0)
+}
+
+```
+
+```{r}
+# Prepare for plotting
+# Create a mapping from PR1 to PR13 to A to M
+identifier_mapping <- setNames(LETTERS[1:13], paste0("PR", 1:13))
+
+# Rename the identifier column
+prim_rec_loss_mod$identifier <- identifier_mapping[prim_rec_loss_mod$identifier]
+prim_rec_gain_mod$identifier <- identifier_mapping[prim_rec_gain_mod$identifier]
+```
+
+
+```{r}
+# Plotting losses and gains
+
+arm_plot = "22q"   # Adjust the chromsome arm name accordingly for what you want to plot
+
+# Subset the data
+subset_data <- prim_rec_loss_mod %>% filter(Chr_Arm == arm_plot)  
+
+# Create a scatter plot with different colors
+scatter_plot_loss <- ggplot(subset_data, aes(x = identifier, y = total_arm_pct, color = factor(primary, levels = c("1", "0")))) +
+  geom_jitter(position = position_dodge(width = 0.5), size = 3) +
+  scale_color_manual(values = c("0" = "darkblue", "1" = "lightblue")) +
+  labs(y = "Arm Loss (%)") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=18), axis.title = element_text(size = 18), legend.position = "none") + scale_y_continuous(breaks = seq(0, 100, by = 25), limits = c(-1,101)) + scale_x_discrete(position = "top") + xlab(NULL)
+
+
+# Subset the data
+subset_data <- prim_rec_gain_mod %>% filter(Chr_Arm == arm_plot)
+
+# Create a scatter plot with different colors
+scatter_plot_gain <- ggplot(subset_data, aes(x = identifier, y = total_arm_pct, color = factor(primary, levels = c("1", "0")))) +
+  geom_jitter(position = position_dodge(width = 0.5), size = 3) +
+  scale_color_manual(values = c("0" = "darkred", "1" = "lightcoral")) +
+  labs(x = "Patients",
+       y = "Arm Gain (%)") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.ticks = element_blank(), axis.text = element_text(size=18), axis.title = element_text(size = 18), legend.position = "none") + scale_y_continuous(breaks = seq(0, 100, by = 5), limits = c(-1,11))
+
+
+# Reverse the y-axis in scatter_plot_loss
+scatter_plot_loss_reversed <- scatter_plot_loss + scale_y_reverse(breaks = seq(0, 100, by = 30), limits = c(91, -1)) #scale_y_reverse() #
+
+# Combine the two plots, with scatter_plot_gain on top and scatter_plot_loss_reversed below it
+combined_plot <- (scatter_plot_gain / scatter_plot_loss_reversed) +
+  plot_layout(heights = c(1, 2))
+
+combined_plot
+```
+
+
+```{r}
+#Stats on the amount of CNV change between primary and recurrent samples
+
+#Losses
+#Setup absolute sizes for below calculation
+prim_rec_loss_mod <- prim_rec_loss_mod %>% mutate(size_mb = ifelse(is.na(size_mb), 0, size_mb))
+
+prim_rec_loss_delta_pct <- prim_rec_loss_mod %>%
+  filter(primary %in% c(0, 1)) %>%
+  group_by(identifier, Chr_Arm) %>%
+  summarise(subtracted_total_arm_pct = total_arm_pct[primary == 0] - total_arm_pct[primary == 1]) %>%
+  ungroup()
+
+#Losses
+prim_rec_loss_delta_abs <- prim_rec_loss_mod %>%
+  filter(primary %in% c(0, 1)) %>%
+  group_by(identifier, Chr_Arm) %>%
+  summarise(subtracted_size_mb = size_mb[primary == 0] - size_mb[primary == 1]) %>%
+  ungroup()
+
+#Gains
+#Setup absolute sizes for below calculation
+prim_rec_gain_mod <- prim_rec_gain_mod %>% mutate(size_mb = ifelse(is.na(size_mb), 0, size_mb))
+
+prim_rec_gain_delta_pct <- prim_rec_gain_mod %>%
+  filter(primary %in% c(0, 1)) %>%
+  group_by(identifier, Chr_Arm) %>%
+  summarise(subtracted_total_arm_pct = total_arm_pct[primary == 0] - total_arm_pct[primary == 1]) %>%
+  ungroup()
+
+#Losses
+prim_rec_gain_delta_abs <- prim_rec_gain_mod %>%
+  filter(primary %in% c(0, 1)) %>%
+  group_by(identifier, Chr_Arm) %>%
+  summarise(subtracted_size_mb = size_mb[primary == 0] - size_mb[primary == 1]) %>%
+  ungroup()
+
+#Combine the sheets
+prim_rec_delta_pct <- rbind(prim_rec_gain_delta_pct, prim_rec_loss_delta_pct)
+prim_rec_delta_abs <- rbind(prim_rec_gain_delta_abs, prim_rec_loss_delta_abs)
+
+#Run stats
+prim_rec_delta_pct %>% filter(subtracted_total_arm_pct >= 1) %>% nrow()
+
+prim_rec_delta_pct %>% filter(subtracted_total_arm_pct >= 1 & subtracted_total_arm_pct <= 5) %>% nrow()
+
+prim_rec_delta_pct %>% filter(subtracted_total_arm_pct < 1 & subtracted_total_arm_pct > -1) %>% nrow()
+
+prim_rec_delta_pct %>% filter(subtracted_total_arm_pct <= -1) %>% nrow()
+prim_rec_delta_pct %>% filter(subtracted_total_arm_pct <= -1 & subtracted_total_arm_pct >= -5) %>% nrow()
+
+
+prim_rec_delta_pct %>% filter(subtracted_total_arm_pct > 5) %>% nrow()
+prim_rec_delta_pct %>% filter(subtracted_total_arm_pct < -5) %>% nrow()
+
+large_prim_rec_change <- prim_rec_delta_pct %>% filter(subtracted_total_arm_pct > 5 | subtracted_total_arm_pct < -5)
+
+
+#Identify the largest CNV change for each patient
+
+prim_rec_largest_change <- prim_rec_delta_pct %>%
+  group_by(identifier) %>%
+  filter(subtracted_total_arm_pct == max(subtracted_total_arm_pct)) %>%
+  select(identifier, Chr_Arm, subtracted_total_arm_pct) %>%
+  ungroup()
+
+#Remove one of the B rows as it is pulling two for some reason
+
+prim_rec_largest_change <- prim_rec_largest_change %>% filter(!(identifier == "B" & Chr_Arm == "3p"))
+
+#Run Wilcoxon test for comparing largest CNV size between patients who had WHO grade 1 - WHO grade 1 meningiomas vs others
+# Extract values for patients A, B, C, D, G, H, I, K
+group1_values <- prim_rec_largest_change %>%
+  filter(identifier %in% c("A", "B", "C", "D", "G", "H", "I", "K")) %>%
+  pull(subtracted_total_arm_pct)
+
+# Extract values for patients E, F, J, L, M
+group2_values <- prim_rec_largest_change %>%
+  filter(identifier %in% c("E", "F", "J", "L", "M")) %>%
+  pull(subtracted_total_arm_pct)
+
+# Perform Wilcoxon rank-sum test
+wilcox_result <- wilcox.test(group1_values, group2_values)
+
+```
+
+  
